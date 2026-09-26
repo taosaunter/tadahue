@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        cursor: crosshair;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #magnifier {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 132px;
+        height: 168px;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #1c1c22;
+        border: 2px solid #3f3f46;
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        z-index: 10;
+      }
+      #gridWrap {
+        width: 108px;
+        height: 108px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 1px solid #3f3f46;
+      }
+      canvas {
+        display: block;
+      }
+      #hex {
+        margin-top: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #e9e6ef;
+      }
+      #hint {
+        margin-top: 2px;
+        font-size: 10px;
+        color: #a6a3ab;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="magnifier">
+      <div id="gridWrap">
+        <canvas id="grid" width="108" height="108"></canvas>
+      </div>
+      <div id="hex">#------</div>
+      <div id="hint"></div>
+    </div>
+    <script>
+      const canvas = document.getElementById("grid");
+      const ctx = canvas.getContext("2d");
+      const hexEl = document.getElementById("hex");
+      const magEl = document.getElementById("magnifier");
+      const locale =
+        new URLSearchParams(location.search).get("locale") === "zh-TW"
+          ? "zh-TW"
+          : "en";
+      document.getElementById("hint").textContent =
+        locale === "zh-TW"
+          ? "左鍵取色 · 右鍵取消"
+          : "Left-click to pick · Right-click to cancel";
+      const N = 9;
+      const CELL = 12;
+      const OFFSET = 18;
+
+      let lastSent = 0;
+      document.addEventListener("mousemove", (e) => {
+        magEl.style.left = e.clientX + OFFSET + "px";
+        magEl.style.top = e.clientY + OFFSET + "px";
+        const now = Date.now();
+        if (now - lastSent < 30) return;
+        lastSent = now;
+        window.pickerOverlay.move(e.clientX, e.clientY);
+      });
+      document.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.pickerOverlay.pick(e.clientX, e.clientY);
+      });
+      document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        window.pickerOverlay.cancel();
+      });
+      window.pickerOverlay.onColor(({ hex, grid, cx, cy }) => {
+        hexEl.textContent = hex;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(
+          canvas.width / 2,
+          canvas.height / 2,
+          canvas.width / 2,
+          0,
+          Math.PI * 2,
+        );
+        ctx.clip();
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            ctx.fillStyle = grid[r * N + c];
+            ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
+          }
+        }
+        ctx.strokeStyle = "rgba(255,255,255,0.95)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx * CELL, cy * CELL, CELL, CELL);
+        ctx.strokeStyle = "rgba(0,0,0,0.8)";
+        ctx.strokeRect(cx * CELL - 1, cy * CELL - 1, CELL + 2, CELL + 2);
+        ctx.restore();
+      });
+    </script>
+  </body>
+</html>

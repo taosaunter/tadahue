@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-muted: var(--primary-muted);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-on-success: var(--on-success);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-on-warning: var(--on-warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
+  --color-danger-muted: var(--danger-muted);
+}
+
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#fff7f7, #120b0b);
+  --surface: light-dark(#fdf2f2, #191212);
+  --surface-raised: light-dark(#f7ebeb, #221b1b);
+  --ink: light-dark(#1b1414, #f0e5e4);
+  --ink-muted: light-dark(#534b4a, #aca2a1);
+  --line: light-dark(#dfd4d4, #393130);
+  --primary: light-dark(#764646, #dfa7a6);
+  --on-primary: light-dark(#f8f8f8, #161616);
+  --primary-muted: light-dark(#fedbda, #402625);
+  --accent: light-dark(#734a33, #dbac92);
+  --success: light-dark(#0b703f, #4add8c);
+  --on-success: light-dark(#f8f8f8, #161616);
+  --success-muted: light-dark(#cbefd6, #173523);
+  --warning: light-dark(#b94f16, #e9ad37);
+  --on-warning: light-dark(#f8f8f8, #161616);
+  --warning-muted: light-dark(#efe5c0, #362d0d);
+  --danger: light-dark(#ac1922, #f8a49d);
+  --on-danger: light-dark(#f8f8f8, #161616);
+  --danger-muted: light-dark(#ffd8d4, #442321);
+}
+
+:root.light {
+  color-scheme: light;
+  --background: #fff7f7;
+  --surface: #fdf2f2;
+  --surface-raised: #f7ebeb;
+  --ink: #1b1414;
+  --ink-muted: #534b4a;
+  --line: #dfd4d4;
+  --primary: #764646;
+  --on-primary: #f8f8f8;
+  --primary-muted: #fedbda;
+  --accent: #734a33;
+  --success: #0b703f;
+  --on-success: #f8f8f8;
+  --success-muted: #cbefd6;
+  --warning: #b94f16;
+  --on-warning: #f8f8f8;
+  --warning-muted: #efe5c0;
+  --danger: #ac1922;
+  --on-danger: #f8f8f8;
+  --danger-muted: #ffd8d4;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --background: #120b0b;
+  --surface: #191212;
+  --surface-raised: #221b1b;
+  --ink: #f0e5e4;
+  --ink-muted: #aca2a1;
+  --line: #393130;
+  --primary: #dfa7a6;
+  --on-primary: #161616;
+  --primary-muted: #402625;
+  --accent: #dbac92;
+  --success: #4add8c;
+  --on-success: #161616;
+  --success-muted: #173523;
+  --warning: #e9ad37;
+  --on-warning: #161616;
+  --warning-muted: #362d0d;
+  --danger: #f8a49d;
+  --on-danger: #161616;
+  --danger-muted: #442321;
+}
+
+body {
+  @apply bg-background text-ink font-sans antialiased;
+}
