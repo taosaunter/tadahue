@@ -2,13 +2,13 @@
 
 ## 簡介 | Overview
 
-輸入一個 HEX 顏色，生成 Tailwind 風格色階、配色方案與 OKLCH light/dark 主題色板，並提供 WCAG 對比度自檢。
+選擇基準色與強調色，拖曳五色色輪，立即在儀表板、形象頁、表單查看亮／暗主題。
 
-Enter a HEX color to generate Tailwind-style scales, color schemes, and OKLCH light/dark theme tokens with WCAG contrast checks.
+Choose two linked colors, explore a five-color harmony wheel, and preview dashboard, landing page, or form themes in light and dark modes.
 
-輸入的顏色會即時套用到整個應用，也能在預覽面板切換 `balanced`、`pastel`、`vintage` 三種風格。預覽支援 `LIGHT / DARK / BOTH`，滿意後可複製 CSS 變數。
+啟動時只顯示窄版色輪面板，頂部為吸管、風格（平衡、粉彩、復古）、語言、主題與展開按鈕。展開後視窗加寬，右側提供預覽、微調、完整色票、更多配色、已存色板五個頁籤。預覽跟隨主題切換；微調頁提供亮度與 OKLCH 色相／明度／彩度操作。互補、分裂互補、三角色的兩個指定色會維持色相關係。
 
-The seed color is applied live to the app. Preview and switch between `balanced`, `pastel`, and `vintage` styles, then copy the generated CSS variables.
+色輪底部以圖示複製 JSON、CSS、Tailwind，或儲存色板。完整色票採 4 行 × 7 列（窄版 7 行 × 4 列）；色票名稱與 HEX 使用懸浮／聚焦提示。WCAG 計算保留在內部。色板庫以五色色帶呈現，點擊即可還原完整設定與亮暗 token，最多保存 20 組；舊版 HEX 紀錄仍可載入。
 
 ## 技術棧 | Stack
 
@@ -37,7 +37,7 @@ The seed color is applied live to the app. Preview and switch between `balanced`
 node scripts/generate-palette.mjs "#新種子色"
 ```
 
-把輸出的 `@theme`、`:root`、`:root.light`、`:root.dark` 貼進 `src/index.css`，或直接使用預覽面板的「複製 CSS 變數」。執行期預覽會由 `src/palette.ts` 依種子色即時生成。
+把輸出的 `@theme`、`:root`、`:root.light`、`:root.dark` 貼進 `src/index.css`，或直接使用預覽面板的「複製 CSS」。Tailwind config 使用 CSS 變數，因此需與複製的 CSS 一起使用。執行期預覽會由 `src/palette.ts` 依種子色即時生成。
 
 Paste the generated `@theme`, `:root`, `:root.light`, and `:root.dark` blocks into `src/index.css`, or use “Copy CSS variables” in the preview. Runtime previews are generated from the seed by `src/palette.ts`.
 

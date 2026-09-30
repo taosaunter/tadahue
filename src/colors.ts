@@ -3,6 +3,7 @@
  * Uses culori for OKLCH ↔ hex conversions.
  */
 import { oklch, formatHex, parseHex } from 'culori';
+import { harmonyColors, pairedColor } from './harmony.ts';
 
 type HexColor = string; // "#RRGGBB"
 
@@ -75,24 +76,12 @@ export function generateComplementary(hex: HexColor): HexColor {
   });
 }
 
-/** Split complementary: complement ±30° — 3 colors. */
+/** Five colors: two linked inputs and three derived colors. */
 export function generateSplitComplementary(hex: HexColor): HexColor[] {
-  const base = oklch(parseHex(hex));
-  if (!base) return [];
-
-  const comp = ((base.h ?? 0) + 180) % 360;
-  return [-30, 0, 30]
-    .map(d => ((comp + d) + 360) % 360)
-    .map(h => formatHex({ ...base, h }));
+  return isHexColor(hex) ? harmonyColors(hex, pairedColor(hex, 'splitComplementary'), 'splitComplementary') : [];
 }
-
-/** Triad: hues at +120° and +240° — 3 colors inc. original. */
 export function generateTriad(hex: HexColor): HexColor[] {
-  const base = oklch(parseHex(hex));
-  if (!base) return [];
-
-  const h = base.h ?? 0;
-  return [0, 120, 240].map(d => formatHex({ ...base, h: (h + d) % 360 }));
+  return isHexColor(hex) ? harmonyColors(hex, pairedColor(hex, 'triad'), 'triad') : [];
 }
 
 /** Shades: same hue, progressive darkening toward black — 5 steps. */
@@ -123,7 +112,7 @@ export function generateAll(hex: HexColor): Record<string, HexColor[]> | null {
     scale: generateScale(hex),
     analogous: generateAnalogous(hex),
     monochromatic: generateMonochromatic(hex),
-    complementary: [generateComplementary(hex)],
+    complementary: harmonyColors(hex, pairedColor(hex, 'complementary'), 'complementary'),
     splitComplementary: generateSplitComplementary(hex),
     triad: generateTriad(hex),
     shades: generateShades(hex),

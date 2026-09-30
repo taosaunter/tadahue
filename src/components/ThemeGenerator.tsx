@@ -1,41 +1,22 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { hsv, parseHex, formatHex } from "culori";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  generateThemePalette,
-  allChecksPass,
-  type ContrastCheck,
   type ThemeMode,
   type ThemeRole,
   type PaletteStyle,
+  type PaletteTuning,
+  type ThemePalette,
+  DEFAULT_TUNING,
   PALETTE_STYLES,
 } from "../palette";
 import { useCopy } from "../useCopy";
 import ColorInput from "./ColorInput";
-import ThemePreview, { type PreviewMode } from "./ThemePreview";
+import ColorWheel from "./ColorWheel";
+import ThemePreview from "./ThemePreview";
 import { useLocale, type MessageKey } from "../i18n";
-
-const THEMES: ThemeMode[] = ["light", "dark"];
-const CHECK_LABEL_KEYS: Record<string, MessageKey> = {
-  "正文/背景": "bodyBackground",
-  "次要文字/背景": "mutedTextBackground",
-  "主色/背景(元件)": "primaryBackground",
-  "主色上的文字/主色": "onPrimary",
-  "強調色/背景(組件)": "accentBackground",
-  "成功色/背景(組件)": "semanticBackground",
-  "成功色上的文字/成功色": "onSemantic",
-  "成功色文字/成功淺底": "semanticMuted",
-  "警告色/背景(組件)": "warningBackground",
-  "警告色上的文字/警告色": "onWarning",
-  "警告色文字/警告淺底": "warningMuted",
-  "危險色/背景(組件)": "dangerBackground",
-  "危險色上的文字/危險色": "onDanger",
-  "危險色文字/危險淺底": "dangerMuted",
-};
-const MODES: Array<{ id: PreviewMode; key: "light" | "dark" | "both" }> = [
-  { id: "light", key: "light" },
-  { id: "dark", key: "dark" },
-  { id: "both", key: "both" },
-];
-
+import { designTokensJson, tailwindConfig } from "../paletteExport";
+import { CssIcon, JsonIcon, TailwindIcon, SaveIcon, PanelLeftOpenIcon, PanelLeftCloseIcon } from "./Icons";
+import { HARMONY_MODES, type HarmonyMode } from "../harmony";
 interface RoleGridProps {
   title: string;
   roles: ThemeRole[];
@@ -45,202 +26,247 @@ interface RoleGridProps {
 
 function RoleGrid({ title, roles, copied, onCopy }: RoleGridProps) {
   const { t } = useLocale();
-  return (
-    <div>
-      <span className="mb-1 block text-[9px] uppercase tracking-widest text-ink-muted">
-        {title}
-      </span>
-      <div
-        className="grid gap-1"
-        style={{ gridTemplateColumns: "repeat(10, minmax(0, 1fr))" }}
-      >
-        {roles.map((r) => {
-          const key = `${title}:${r.name}`;
-          const isCopied = copied === key;
-          return (
-            <button
-              key={r.name}
-              type="button"
-              onClick={() => onCopy(r.hex, key)}
-              title={t("copyHex", { hex: r.hex })}
-              className="group/sw flex flex-col items-center gap-0.5 focus:outline-none"
-            >
-              <div
-                className="h-6 w-full rounded border border-line transition-transform group-hover/sw:scale-105
-                  group-hover/sw:ring-2 group-hover/sw:ring-ink-muted group-active/sw:scale-95"
-                style={{ backgroundColor: r.hex }}
-              />
-              <span className="w-full truncate text-center font-mono text-[9px] text-ink-muted">
-                {r.name}
-              </span>
-              <span
-                className={`font-mono text-[9px] ${isCopied ? "font-semibold text-success" : "text-ink-muted"}`}
-              >
-                {isCopied ? t("copied") : r.hex}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+  return <div className="rounded-lg p-2"><h2 className="mb-2 text-xs text-ink-muted">{title}</h2><div className={roles.length === 28 ? "token-grid" : "grid grid-cols-5 gap-2"}>
+    {roles.map(role => { const key = `${title}:${role.name}`; const label = `${role.name} · ${role.hex} · ${copied === key ? t("copied") : t("copyHex", {hex: role.hex})}`;
+      return <button key={role.name} type="button" onClick={() => onCopy(role.hex, key)} aria-label={label} data-tooltip={label} className="swatch-button rounded-lg" style={{backgroundColor:role.hex}}/>;
+    })}
+  </div></div>;
 }
+const TABS = ["preview", "tuning", "tokens", "palettes", "library"] as const;
+type Tab = typeof TABS[number];
+const TAB_LABELS = { tuning: "tuningTab", preview: "previewTab", tokens: "colorSwatches", palettes: "morePalettes", library: "libraryTab" } as const;
 
-function CheckList({
-  theme,
-  checks,
-}: {
-  theme: string;
-  checks: ContrastCheck[];
-}) {
-  const { t } = useLocale();
-  const allOk = checks.every((c) => c.ok);
-  return (
-    <div className="flex flex-col gap-0.5 rounded-lg border border-line p-2">
-      <span
-        className={`mb-1 text-[10px] font-semibold ${allOk ? "text-success" : "text-danger"}`}
-      >
-        {theme} WCAG {allOk ? t("wcagPass") : t("wcagFail")}
-      </span>
-      {checks.map((c) => (
-        <span
-          key={c.label}
-          className={`font-mono text-[10px] ${c.ok ? "text-ink-muted" : "text-danger"}`}
-        >
-          {c.ok ? "✔" : "✘"} {t(CHECK_LABEL_KEYS[c.label] ?? "bodyBackground")}{" "}
-          {c.ratio.toFixed(2)}:1
-          {c.ok ? "" : ` ${t("needsRatio", { ratio: c.min })}`}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-interface ThemeGeneratorProps {
+interface Props {
+  theme: ThemeMode;
+  settings: ReactNode;
+  onSave: () => boolean;
   seed: string;
-  onSeedChange: (hex: string) => void;
+  accent: string;
+  harmony: HarmonyMode;
+  onAnchorChange: (anchor: 0 | 1, hex: string) => void;
+  onHarmonyChange: (mode: HarmonyMode) => void;
   style: PaletteStyle;
   onStyleChange: (style: PaletteStyle) => void;
+  tuning: PaletteTuning;
+  onTuningChange: (tuning: PaletteTuning) => void;
+  palette: ThemePalette | null;
   actions?: ReactNode;
+  library?: ReactNode;
+  extras?: ReactNode;
 }
-
 export default function ThemeGenerator({
+  theme,
+  settings,
+  onSave,
   seed,
-  onSeedChange,
+  accent,
+  harmony,
+  onAnchorChange,
+  onHarmonyChange,
   style,
   onStyleChange,
+  tuning,
+  onTuningChange,
+  palette,
   actions,
-}: ThemeGeneratorProps) {
-  const [mode, setMode] = useState<PreviewMode>("both");
-  const { copied, copy } = useCopy();
+  library,
+  extras,
+}: Props) {
+  const [expanded, setExpanded] = useState(false);
+  const [tab, setTab] = useState<Tab>("preview");
+  const [saveStatus, setSaveStatus] = useState<"" | "saved" | "error">("");
+  const saveTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(saveTimer.current), []);
+  const tabButtons = useRef<Array<HTMLButtonElement | null>>([]);
+  useEffect(() => { window.workspace?.setExpanded(expanded); }, [expanded]);
+  const { copied, copy, error } = useCopy();
   const { t } = useLocale();
-
-  const palette = useMemo(
-    () => generateThemePalette(seed, style),
-    [seed, style],
-  );
-  const cssCopied = copied === "css";
-
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <ColorInput value={seed} onChange={onSeedChange} />
-        <label className="flex items-center gap-1.5 text-xs text-ink-muted">
-          <span>{t("style")}</span>
+    <main className={`workspace ${expanded ? "workspace-expanded" : "workspace-collapsed"}`}>
+      <aside className="controls-pane">
+        <header className="panel-toolbar" aria-label={t("appTitle")}>
+          <div className="toolbar-left">
+          {actions}
+          <select className="compact-select toolbar-style" aria-label={t("style")} value={style} onChange={event => onStyleChange(event.target.value as PaletteStyle)}>
+            {PALETTE_STYLES.map(value => <option key={value} value={value}>{t(`style${value[0].toUpperCase()}${value.slice(1)}` as MessageKey)}</option>)}
+          </select>
+          </div>
+          <div className="toolbar-right">
+          {settings}
+          <button className="icon-button" type="button" aria-label={t(expanded ? "collapseLayout" : "expandLayout")} data-tooltip={t(expanded ? "collapseLayout" : "expandLayout")} aria-expanded={expanded} aria-controls="workspace-tools" onClick={() => { if (!expanded) setTab("preview"); setExpanded(!expanded); }}>
+            {expanded ? <PanelLeftCloseIcon/> : <PanelLeftOpenIcon/>}
+          </button>
+          </div>
+        </header>
+        <div className="grid grid-cols-2 gap-2">
+          {[seed, accent].map((value, index) => (
+            <div key={index}>
+              <label className="mb-1 block text-xs font-medium">
+                {t(index === 0 ? "colorOne" : "colorTwo")}
+              </label>
+              <ColorInput
+                label={t(index === 0 ? "colorOne" : "colorTwo")}
+                value={value}
+                onChange={(hex) => onAnchorChange(index as 0 | 1, hex)}
+              />
+            </div>
+          ))}
+        </div>
+        <label className="mt-3 flex items-center justify-between gap-2 text-xs">
+          <span className="text-ink-muted">{t("harmony")}</span>
           <select
-            value={style}
-            onChange={(e) => onStyleChange(e.target.value as PaletteStyle)}
-            className="rounded-lg border border-line bg-surface-raised px-2 py-2 text-xs text-ink outline-none focus:border-primary"
+            className="compact-select"
+            value={harmony}
+            onChange={(event) =>
+              onHarmonyChange(event.target.value as HarmonyMode)
+            }
           >
-            {PALETTE_STYLES.map((value) => (
+            {HARMONY_MODES.map((value) => (
               <option key={value} value={value}>
-                {t(
-                  `style${value[0].toUpperCase()}${value.slice(1)}` as MessageKey,
-                )}
+                {t(value)}
               </option>
             ))}
           </select>
         </label>
-        {actions}
-
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div
-            role="group"
-            aria-label={t("previewTheme")}
-            className="flex rounded-lg border border-line bg-surface-raised p-0.5"
-          >
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setMode(m.id)}
-                aria-pressed={mode === m.id}
-                className={`rounded-md px-2.5 py-1 text-[10px] uppercase tracking-widest transition-colors ${
-                  mode === m.id
-                    ? "bg-primary text-on-primary"
-                    : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                {t(m.key)}
-              </button>
+        {palette ? (
+          <ColorWheel
+            seed={seed}
+            accent={accent}
+            mode={harmony}
+            onChange={onAnchorChange}
+          />
+        ) : (
+          <p className="my-4 text-xs text-danger" role="status">
+            {t("invalidHex", { value: seed + " / " + accent })}
+          </p>
+        )}
+        <footer className="output-toolbar" aria-label={t("outputs")}>
+          {([
+            ["json", "copyJson", JsonIcon, () => palette && designTokensJson(palette, style, tuning, {mode:harmony, accent})],
+            ["css", "copyCss", CssIcon, () => palette?.css],
+            ["tailwind", "copyTailwind", TailwindIcon, () => palette && tailwindConfig(palette)],
+          ] as const).map(([key,label,Icon,content]) => <button key={key} className="icon-button" type="button" disabled={!palette} aria-label={t(label)} data-feedback={copied === key || undefined} data-tooltip={error === key ? t("copyFailed") : copied === key ? t("copied") : t(label)} onClick={() => { const value = content(); if (value) copy(value,key); }}><Icon/></button>)}
+          <button className="icon-button" type="button" disabled={!palette} aria-label={t("savePalette")} data-feedback={saveStatus === "saved" || undefined} data-tooltip={saveStatus === "saved" ? t("saved") : saveStatus === "error" ? t("storageError") : t("savePalette")} onClick={() => {
+            window.clearTimeout(saveTimer.current);
+            const saved = onSave();
+            setSaveStatus(saved ? "saved" : "error");
+            if (saved) saveTimer.current = window.setTimeout(() => setSaveStatus(""), 1600);
+          }}><SaveIcon/></button>
+        </footer>
+        <p role="status" className="sr-only">{error ? t("copyFailed") : copied ? t("copied") : saveStatus === "saved" ? t("saved") : saveStatus === "error" ? t("storageError") : ""}</p>
+      </aside>
+      <section id="workspace-tools" className="tools-pane" hidden={!expanded} aria-label={t("workspaceTools")}>
+        <div role="tablist" aria-label={t("workspaceTools")} className="workspace-tabs">
+          {TABS.map((value,index) => <button key={value} ref={node => {tabButtons.current[index] = node;}} type="button" role="tab" id={`tab-${value}`} aria-controls={`panel-${value}`} aria-selected={tab === value} tabIndex={tab === value ? 0 : -1} onClick={() => setTab(value)} onKeyDown={event => {
+            let next = index;
+            if (event.key === "ArrowRight") next = (index + 1) % TABS.length;
+            else if (event.key === "ArrowLeft") next = (index + TABS.length - 1) % TABS.length;
+            else if (event.key === "Home") next = 0;
+            else if (event.key === "End") next = TABS.length - 1;
+            else return;
+            event.preventDefault(); setTab(TABS[next]); tabButtons.current[next]?.focus();
+          }}>{t(TAB_LABELS[value])}</button>)}
+        </div>
+        <div role="tabpanel" id="panel-tuning" aria-labelledby="tab-tuning" tabIndex={0} hidden={tab !== "tuning"}>          <div className="space-y-3 p-3">
+            {[seed, accent].map((hex, index) => {
+              const color = hsv(parseHex(hex));
+              return (
+                color && (
+                  <label key={index} className="block text-xs text-ink-muted">
+                    {t(index === 0 ? "colorOne" : "colorTwo")} ·{" "}
+                    {t("brightness")}
+                    <input
+                      className="mt-1 block w-full accent-primary"
+                      type="range"
+                      min="0.01"
+                      max="1"
+                      step="0.01"
+                      value={color.v}
+                      onChange={(event) =>
+                        onAnchorChange(
+                          index as 0 | 1,
+                          formatHex({
+                            ...color,
+                            v: Number(event.target.value),
+                          }),
+                        )
+                      }
+                    />
+                  </label>
+                )
+              );
+            })}
+            {(
+              [
+                ["hueShift", "tuneHue", -30, 30, 1, "°"],
+                ["lightnessShift", "tuneLightness", -0.1, 0.1, 0.01, ""],
+                ["chromaScale", "tuneChroma", 0.5, 1.5, 0.05, "×"],
+              ] as const
+            ).map(([field, label, min, max, step, unit]) => (
+              <label key={field} className="block text-xs text-ink-muted">
+                <span className="flex justify-between">
+                  <span>{t(label)}</span>
+                  <output className="font-mono text-ink">
+                    {field === "lightnessShift"
+                      ? tuning[field].toFixed(2)
+                      : tuning[field]}
+                    {unit}
+                  </output>
+                </span>
+                <input
+                  className="mt-1 w-full accent-primary"
+                  type="range"
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={tuning[field]}
+                  onChange={(event) =>
+                    onTuningChange({
+                      ...tuning,
+                      [field]: Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
             ))}
+            <p className="text-[11px] leading-relaxed text-ink-muted">
+              {t("tuningHint")}
+            </p>
+            {palette && (
+              <RoleGrid
+                title={t("adjustedColors")}
+                roles={palette[theme].filter(
+                  (role) =>
+                    [
+                      "primary",
+                      "accent",
+                      "background",
+                      "surface",
+                      "ink",
+                    ].includes(role.name),
+                )}
+                copied={copied}
+                onCopy={copy}
+              />
+            )}
+            <button
+              type="button"
+              className="quiet-button"
+              disabled={
+                JSON.stringify(tuning) === JSON.stringify(DEFAULT_TUNING)
+              }
+              onClick={() => onTuningChange({ ...DEFAULT_TUNING })}
+            >
+              {t("resetTuning")}
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => palette && copy(palette.css, "css")}
-            disabled={!palette}
-            className="rounded-lg border border-line bg-surface-raised px-3 py-2 text-xs text-ink-muted
-              transition-colors hover:border-primary hover:text-ink active:scale-95 disabled:opacity-40"
-          >
-            {cssCopied ? t("copiedCss") : t("copyCss")}
-          </button>
-        </div>
-      </div>
-
-      {palette ? (
-        <>
-          {!allChecksPass(palette) && (
-            <p className="mb-3 text-xs text-danger">{t("contrastWarning")}</p>
-          )}
-
-          <ThemePreview palette={palette} mode={mode} />
-
-          <details className="mt-4 rounded-lg border border-line">
-            <summary className="cursor-pointer px-3 py-2 text-[10px] uppercase tracking-widest text-ink-muted">
-              {t("colorSwatches")}
-            </summary>
-            <div className="flex flex-wrap items-start gap-3 border-t border-line p-3 xl:flex-nowrap">
-              <div className="min-w-[26rem] flex-1 space-y-2">
-                {THEMES.map((theme) => (
-                  <RoleGrid
-                    key={theme}
-                    title={
-                      theme === "light" ? t("lightPalette") : t("darkPalette")
-                    }
-                    roles={palette[theme]}
-                    copied={copied}
-                    onCopy={copy}
-                  />
-                ))}
-              </div>
-              <div className="flex flex-1 flex-col gap-2 xl:w-56 xl:flex-none">
-                {THEMES.map((theme) => (
-                  <CheckList
-                    key={theme}
-                    theme={theme}
-                    checks={palette.checks[theme]}
-                  />
-                ))}
-              </div>
-            </div>
-          </details>
-        </>
-      ) : (
-        <p className="text-xs text-danger">
-          {t("invalidHex", { value: seed || "empty" })}
-        </p>
-      )}
-    </section>
+</div>
+        <div role="tabpanel" id="panel-preview" aria-labelledby="tab-preview" tabIndex={0} hidden={tab !== "preview"}>{palette && <ThemePreview palette={palette} theme={theme}/>}</div>
+        <div role="tabpanel" id="panel-tokens" aria-labelledby="tab-tokens" tabIndex={0} hidden={tab !== "tokens"}>{palette && <RoleGrid title={t(theme === "light" ? "lightPalette" : "darkPalette")} roles={palette[theme]} copied={copied} onCopy={copy}/>}</div>
+        <div role="tabpanel" id="panel-palettes" aria-labelledby="tab-palettes" tabIndex={0} hidden={tab !== "palettes"}>{extras}</div>
+        <div role="tabpanel" id="panel-library" aria-labelledby="tab-library" tabIndex={0} hidden={tab !== "library"}>{library}</div>
+      </section>
+    </main>
   );
 }

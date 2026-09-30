@@ -16,8 +16,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1000,
-    height: 800,
+    width: 356,
+    minWidth: 356,
+    minHeight: 520,
+    height: 560,
+    useContentSize: true,
     webPreferences: {
       preload: join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -26,10 +29,30 @@ function createWindow() {
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#120b0b" : "#fff7f7",
   });
 
+  // Only this window's renderer can request the two supported workspace widths.
+  const resizeWorkspace = (event, expanded) => {
+    if (event.sender !== win.webContents || typeof expanded !== "boolean") return;
+    if (win.isFullScreen()) {
+      win.once("leave-full-screen", () => resizeWorkspace(event, expanded));
+      win.setFullScreen(false);
+      return;
+    }
+    if (win.isMaximized()) win.unmaximize();
+    const bounds = win.getBounds();
+    const content = win.getContentBounds();
+    const frameWidth = bounds.width - content.width;
+    const area = screen.getDisplayMatching(bounds).workArea;
+    const width = Math.min((expanded ? 1020 : 356) + frameWidth, area.width);
+    win.setMinimumSize(356 + frameWidth, 520 + bounds.height - content.height);
+    win.setBounds({ ...bounds, width, x: Math.max(area.x, Math.min(bounds.x, area.x + area.width - width)) });
+  };
+  ipcMain.on("workspace:expanded", resizeWorkspace);
+  win.on("closed", () => ipcMain.removeListener("workspace:expanded", resizeWorkspace));
+
   // Dev: connect to Vite dev server. Prod: load built files.
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
-    win.webContents.openDevTools();
+    win.webContents.openDevTools({ mode: "detach" });
   } else {
     win.loadFile(join(__dirname, "../dist/index.html"));
   }

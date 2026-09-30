@@ -15,6 +15,24 @@ export type RoleGroup = "base" | "semantic";
 export type ThemeMode = "light" | "dark";
 export type PaletteStyle = "balanced" | "pastel" | "vintage";
 export const PALETTE_STYLES: PaletteStyle[] = ["balanced", "pastel", "vintage"];
+export interface PaletteTuning {
+  hueShift: number;
+  lightnessShift: number;
+  chromaScale: number;
+}
+export const DEFAULT_TUNING: PaletteTuning = {
+  hueShift: 0,
+  lightnessShift: 0,
+  chromaScale: 1,
+};
+
+export function isPaletteTuning(value: unknown): value is PaletteTuning {
+  if (!value || typeof value !== "object") return false;
+  const tuning = value as Partial<PaletteTuning>;
+  return typeof tuning.hueShift === "number" && Number.isFinite(tuning.hueShift) && Math.abs(tuning.hueShift) <= 30 &&
+    typeof tuning.lightnessShift === "number" && Number.isFinite(tuning.lightnessShift) && Math.abs(tuning.lightnessShift) <= 0.1 &&
+    typeof tuning.chromaScale === "number" && Number.isFinite(tuning.chromaScale) && tuning.chromaScale >= 0.5 && tuning.chromaScale <= 1.5;
+}
 
 export interface ThemeRole {
   name: string;
@@ -35,6 +53,7 @@ const ROLE_L: Record<string, [number, number]> = {
   background: [0.985, 0.16],
   surface: [0.97, 0.19],
   "surface-raised": [0.95, 0.23],
+  "on-surface": [0.2, 0.93],
   ink: [0.2, 0.93],
   "ink-muted": [0.42, 0.72],
   line: [0.88, 0.32],
@@ -42,6 +61,11 @@ const ROLE_L: Record<string, [number, number]> = {
   "on-primary": [0.98, 0.2],
   "primary-muted": [0.92, 0.3],
   accent: [0.45, 0.78],
+  "on-accent": [0.98, 0.2],
+  focus: [0.38, 0.82],
+  selected: [0.9, 0.36],
+  disabled: [0.52, 0.58],
+  "disabled-muted": [0.91, 0.35],
 };
 
 const STYLE_ROLE_L: Record<
@@ -85,6 +109,7 @@ function roleChroma(
     case "primary-muted":
       return primaryC * 0.6 * scale;
     case "on-primary":
+    case "on-accent":
       return 0;
     case "accent":
       return primaryC * scale;
@@ -99,19 +124,22 @@ function buildRoles(
   tint: number,
   primaryC: number,
   style: PaletteStyle,
+  tuning: PaletteTuning,
+  accent?: ReturnType<typeof oklch>,
 ): ThemeRole[] {
   return Object.entries(ROLE_L).map(([name, [lightL, darkL]]) => {
     const styleL = style === "balanced" ? undefined : STYLE_ROLE_L[style][name];
-    const L =
+    const baseL =
       (theme === "light" ? styleL?.[0] : styleL?.[1]) ??
       (theme === "light" ? lightL : darkL);
-    const h = name === "accent" ? (hue + 30) % 360 : hue;
+    const L = name.startsWith("on-") ? baseL : Math.max(0.04, Math.min(0.99, baseL + tuning.lightnessShift));
+    const h = ((name === "accent" && accent ? accent.h ?? 0 : hue + (name === "accent" ? 30 : 0)) + tuning.hueShift + 360) % 360;
     return {
       name,
       hex: formatHex({
         mode: "oklch",
         l: L,
-        c: roleChroma(name, tint, primaryC, style),
+        c: roleChroma(name, tint, name === "accent" && accent ? accent.c : primaryC, style) * tuning.chromaScale,
         h,
       }),
       group: "base",
@@ -142,6 +170,7 @@ const SEMANTIC: Record<
     lightOnL: 0.98,
   },
   danger: { hue: 25, lightC: 0.18, darkC: 0.1 },
+  info: { hue: 250, lightC: 0.14, darkC: 0.12 },
 };
 
 const SEMANTIC_L: Record<"fill" | "on" | "muted", [number, number]> = {
@@ -181,7 +210,7 @@ function buildSemanticRoles(theme: ThemeMode): ThemeRole[] {
         },
         {
           name: `${key}-muted`,
-          hex: at(SEMANTIC_L.muted[i], SEMANTIC_MUTED_C),
+          hex: at(key === "warning" && theme === "light" ? 0.98 : SEMANTIC_L.muted[i], SEMANTIC_MUTED_C),
           group: "semantic",
         },
       ];
@@ -190,7 +219,7 @@ function buildSemanticRoles(theme: ThemeMode): ThemeRole[] {
 }
 
 const AA_TEXT = 4.5;
-const REPAIR_MAX_DL = 0.02;
+const REPAIR_MAX_DL = 0.15;
 const REPAIR_STEP = 0.001;
 
 const CONTRAST_CHECKS: Array<
@@ -198,9 +227,13 @@ const CONTRAST_CHECKS: Array<
 > = [
   ["Body / background", "ink", "background", AA_TEXT],
   ["Muted text / background", "ink-muted", "background", AA_TEXT],
+  ["Text on surface / surface", "on-surface", "surface", AA_TEXT],
   ["Primary / background (component)", "primary", "background", 3],
   ["Text on primary / primary", "on-primary", "primary", AA_TEXT],
   ["Accent / background (component)", "accent", "background", 3],
+  ["Text on accent / accent", "on-accent", "accent", AA_TEXT],
+  ["Focus / background (component)", "focus", "background", 3],
+  ["Text on selected / selected", "ink", "selected", AA_TEXT],
   ["Success / background (component) ", "success", "background", 3],
   ["Text on success / success", "on-success", "success", AA_TEXT],
   [
@@ -209,10 +242,15 @@ const CONTRAST_CHECKS: Array<
     "success-muted",
     AA_TEXT,
   ],
+  ["Warning / background (component)", "warning", "background", 3],
   ["Text on warning / warning", "on-warning", "warning", AA_TEXT],
+  ["Warning text / light warning background", "warning", "warning-muted", AA_TEXT],
   ["Danger / background (component) ", "danger", "background", 3],
   ["Text on danger / danger", "on-danger", "danger", AA_TEXT],
   ["Danger text / light danger background", "danger", "danger-muted", AA_TEXT],
+  ["Info / background (component)", "info", "background", 3],
+  ["Text on info / info", "on-info", "info", AA_TEXT],
+  ["Info text / light info background", "info", "info-muted", AA_TEXT],
 ];
 
 function repairFillContrast(
@@ -249,27 +287,41 @@ function repairRoles(
 export function generateThemePalette(
   seedHex: string,
   style: PaletteStyle = "balanced",
+  tuning: PaletteTuning = DEFAULT_TUNING,
+  accentHex?: string,
 ): ThemePalette | null {
-  if (!isHexColor(seedHex)) return null;
+  if (!isHexColor(seedHex) || !PALETTE_STYLES.includes(style) || !isPaletteTuning(tuning)) return null;
   const base = oklch(parseHex(seedHex));
   if (!base) return null;
 
+  if (accentHex !== undefined && !isHexColor(accentHex)) return null;
+  const accent = accentHex ? oklch(parseHex(accentHex)) : undefined;
   const H = base.h ?? 0;
   const C0 = base.c;
   const primaryC = C0 < 0.02 ? C0 : Math.max(C0, 0.05);
   const tint = Math.min(C0, 0.012);
 
   const light = [
-    ...buildRoles("light", H, tint, primaryC, style),
+    ...buildRoles("light", H, tint, primaryC, style, tuning, accent),
     ...buildSemanticRoles("light"),
   ];
   const dark = [
-    ...buildRoles("dark", H, tint, primaryC, style),
+    ...buildRoles("dark", H, tint, primaryC, style, tuning, accent),
     ...buildSemanticRoles("dark"),
   ];
 
   repairRoles(light, "on-primary", "primary");
   repairRoles(dark, "on-primary", "primary");
+  repairRoles(light, "on-accent", "accent");
+  repairRoles(dark, "on-accent", "accent");
+
+  return assembleThemePalette(seedHex, light, dark);
+}
+
+export function assembleThemePalette(seedHex: string, light: ThemeRole[], dark: ThemeRole[]): ThemePalette | null {
+  if (!isHexColor(seedHex)) return null;
+  const base = oklch(parseHex(seedHex));
+  if (!base) return null;
 
   const runChecks = (roles: ThemeRole[]) => {
     const hexes = Object.fromEntries(roles.map((r) => [r.name, r.hex]));
@@ -291,7 +343,7 @@ export function generateThemePalette(
 
   return {
     seed: seedHex.toUpperCase(),
-    seedOklch: { l: base.l, c: base.c, h: H },
+    seedOklch: { l: base.l, c: base.c, h: base.h ?? 0 },
     light,
     dark,
     checks: { light: runChecks(light), dark: runChecks(dark) },

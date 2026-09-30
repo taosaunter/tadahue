@@ -25,7 +25,9 @@ export function getStoredTheme(): string | null {
 export function storeTheme(theme: Theme): void {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {}
+  } catch {
+    // Theme stays active for this session when storage is unavailable.
+  }
 }
 
 export function systemPrefersDark(): boolean {

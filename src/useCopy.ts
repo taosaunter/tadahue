@@ -19,19 +19,28 @@ function writeClipboard(text: string): Promise<void> {
 
 export function useCopy(resetMs = 1200) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const request = useRef(0);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const copy = useCallback(
-    (text: string, key: string = text) => {
-      writeClipboard(text).catch(() => {});
-      setCopied(key);
+    async (text: string, key: string = text) => {
+      const current = ++request.current;
+      setError(null); setCopied(null);
       window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(() => setCopied(null), resetMs);
+      try {
+        await writeClipboard(text);
+        if (current !== request.current) return;
+        setCopied(key);
+        timer.current = window.setTimeout(() => setCopied(null), resetMs);
+      } catch {
+        if (current === request.current) setError(key);
+      }
     },
     [resetMs],
   );
 
-  return { copied, copy };
+  return { copied, copy, error };
 }

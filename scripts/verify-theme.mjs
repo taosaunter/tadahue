@@ -143,7 +143,9 @@ async function openChrome(url, chromePath, { colorScheme = "light" } = {}) {
       origin: new URL(url).origin,
       permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
     });
-  } catch {}
+  } catch {
+    // Some browsers do not expose clipboard permissions.
+  }
 
   await send("Page.navigate", { url });
   for (
@@ -336,7 +338,7 @@ async function main() {
         .filter((r) => !rendered.has(r.hex))
         .map((r) => r.name);
       check(
-        `${mode.toUpperCase()} 預覽涵蓋全部 19 個角色`,
+        `${mode.toUpperCase()} 預覽涵蓋全部 ${palette[theme].length} 個角色`,
         missing.length === 0,
         missing.length
           ? `缺 ${missing.join(", ")}`
@@ -379,7 +381,7 @@ async function main() {
     await sleep(300);
 
     await page.evaluate(
-      `document.querySelector('section details').open = true; true`,
+      `document.querySelectorAll('section details')[1].open = true; true`,
     );
     await sleep(200);
     const swatch = await page.evaluate(`(() => {
@@ -394,12 +396,21 @@ async function main() {
     let clipboard = null;
     try {
       clipboard = await page.evaluate("navigator.clipboard.readText()");
-    } catch {}
+    } catch {
+      // Clipboard access is optional in headless mode.
+    }
     check(
       "點色票複製 HEX",
       /Copied|已複製/.test(label) && (!clipboard || clipboard === swatch),
       `複製 ${swatch}，剪貼簿=${clipboard ?? "不可讀"}，回饋="${label}"`,
     );
+    const previewOutline = await page.evaluate(`(() => {
+      const card = document.querySelector('div[style*="--color-surface"]');
+      const label = card.querySelector('strong');
+      label.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      return { outline: getComputedStyle(label).outlineStyle, marked: card.querySelectorAll('[data-active="true"]').length };
+    })()`);
+    check("預覽懸停不出現 token 外框", previewOutline.outline === "none" && previewOutline.marked === 0, JSON.stringify(previewOutline));
 
     const copied = await page.evaluate(
       `[...document.querySelectorAll('section button')].find(b => /Copy CSS|复制 CSS/.test(b.textContent)).click(); 'clicked'`,
@@ -408,7 +419,9 @@ async function main() {
     let cssText = null;
     try {
       cssText = await page.evaluate("navigator.clipboard.readText()");
-    } catch {}
+    } catch {
+      // Clipboard access is optional in headless mode.
+    }
     check(
       "複製 CSS 變數含三塊（@theme / :root / :root.dark）",
       copied === "clicked" &&
@@ -491,6 +504,12 @@ async function main() {
         localeProbe.input === "種子色 hex",
       `lang=${localeProbe.lang} title=${localeProbe.title} input=${localeProbe.input}`,
     );
+    await page.evaluate(`document.querySelectorAll('section details')[1].open = true; true`);
+    const localizedChecks = await page.evaluate(`(() => {
+      const text = document.querySelectorAll('section details')[1].innerText;
+      return { body: text.includes('正文／背景'), warning: text.includes('警告色文字／警告淺底'), info: text.includes('資訊文字／資訊淺底') };
+    })()`);
+    check("WCAG 檢查名稱在繁中正確對應", Object.values(localizedChecks).every(Boolean), JSON.stringify(localizedChecks));
   } finally {
     page.close();
     server?.close();

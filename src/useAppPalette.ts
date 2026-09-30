@@ -1,17 +1,11 @@
-import { useEffect, useMemo } from "react";
-import { generateThemePalette, scopeVars, type PaletteStyle } from "./palette";
+import { useEffect } from "react";
+import { scopeVars, type ThemePalette } from "./palette";
 import type { Theme } from "./theme";
 
 export function useAppPalette(
-  seedHex: string,
+  palette: ThemePalette | null,
   theme: Theme,
-  style: PaletteStyle = "balanced",
 ) {
-  const palette = useMemo(
-    () => generateThemePalette(seedHex, style),
-    [seedHex, style],
-  );
-
   useEffect(() => {
     if (!palette) return;
     const root = document.documentElement;

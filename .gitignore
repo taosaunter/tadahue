@@ -4,3 +4,4 @@ release/
 tmp/
 *.log
 graphify-out/
+.prettierrc

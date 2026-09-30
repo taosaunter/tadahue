@@ -18,7 +18,7 @@ export default function PaletteSection({
       </h2>
       <div
         className="grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${colors.length}, 1fr)` }}
+        style={{ gridTemplateColumns: `repeat(${Math.min(colors.length, 5)}, minmax(0, 1fr))` }}
       >
         {colors.map((hex, i) => (
           <ColorSwatch key={i} hex={hex} label={labels?.[i]} />
