@@ -1,5 +1,6 @@
 export type Theme = "light" | "dark";
 
+// Keep the key stable so upgrades retain the user's theme preference.
 export const THEME_STORAGE_KEY = "color-palette-theme";
 
 export function themeFromMedia(prefersDark: boolean): Theme {

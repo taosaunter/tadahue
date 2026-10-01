@@ -25,5 +25,5 @@ export function designTokensJson(palette: ThemePalette, style: PaletteStyle, tun
 
 export function tailwindConfig(palette: ThemePalette): string {
   const colors = Object.fromEntries(palette.light.map(({ name }) => [name, `var(--${name})`]));
-  return `// Pair with color-palette.css for light and dark token values.\nexport default {\n  theme: {\n    extend: {\n      colors: ${JSON.stringify(colors, null, 2).replaceAll("\n", "\n      ")}\n    }\n  }\n};\n`;
+  return `// Pair with tadahue.css for light and dark token values.\nexport default {\n  theme: {\n    extend: {\n      colors: ${JSON.stringify(colors, null, 2).replaceAll("\n", "\n      ")}\n    }\n  }\n};\n`;
 }

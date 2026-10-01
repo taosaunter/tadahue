@@ -60,10 +60,10 @@ test("exported CSS, token JSON, Tailwind config, and library JSON remain usable 
   const snapshot = createSnapshot("file-test", "File test", "", "balanced", DEFAULT_TUNING, palette);
   const directory = await mkdtemp(join(tmpdir(), "palette-export-"));
   try {
-    const cssPath = join(directory, "color-palette.css");
-    const tokensPath = join(directory, "color-palette.tokens.json");
-    const configPath = join(directory, "color-palette.tailwind.mjs");
-    const libraryPath = join(directory, "color-palette-library.json");
+    const cssPath = join(directory, "tadahue.css");
+    const tokensPath = join(directory, "tadahue.tokens.json");
+    const configPath = join(directory, "tadahue.tailwind.mjs");
+    const libraryPath = join(directory, "tadahue-library.json");
     await Promise.all([
       writeFile(cssPath, palette.css),
       writeFile(tokensPath, designTokensJson(palette, "balanced", DEFAULT_TUNING)),

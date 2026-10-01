@@ -2,12 +2,15 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 export type Locale = 'en' | 'zh-TW';
 
+// Keep the key stable so upgrades retain the user's language preference.
 const STORAGE_KEY = 'color-palette-locale';
 const messages = {
   en: {
+    imageTab: 'Image colors', imageChoose: 'Choose image', imageDrop: 'Drop an image here, or choose a file.', imageLocal: 'Processed locally · PNG, JPEG, WebP, GIF · Up to 20 MB', imageBusy: 'Extracting colors…', imageFailed: 'Could not extract colors. Try another PNG, JPEG, WebP or GIF image.', imageTooLarge: 'Image is too large. Choose a file under 20 MB and 64 megapixels.', imageUnsupported: 'Choose a PNG, JPEG, WebP or GIF image.', imageEmpty: 'No visible colors found. Try an image with opaque pixels.', imageSetBase: 'Set as base color', imageSetAccent: 'Set as accent color', imageApplyDone: 'Applied', imageApplied: 'Applied {hex} to {target}.', imageRemove: 'Remove image', imagePreview: 'Selected image',
+
     tuningTab: 'Tuning', previewTab: 'Preview', libraryTab: 'Saved palettes',
     expandLayout: 'Expand preview', collapseLayout: 'Collapse tools', workspaceTools: 'Palette tools',
-    appTitle: 'Color Palette', appDescription: 'Enter a hex color to generate palettes and theme tokens.',
+    appTitle: 'TadaHue', appDescription: 'Enter a hex color to generate palettes and theme tokens.',
     language: 'Language', english: 'English', traditionalChinese: '繁體中文', light: 'Light', dark: 'Dark', both: 'Both',
     switchToLight: 'Switch to light theme', switchToDark: 'Switch to dark theme', manualTheme: 'Manually selected', followSystem: 'Following system',
     eyedropper: 'Pick color', savePalette: 'Save Palette', saved: 'Saved ✓', savedPalettes: 'Saved Palettes',
@@ -22,9 +25,11 @@ const messages = {
     paletteSaved: 'Palette saved.', storageError: 'Unable to save locally. Check browser storage.', deleteSavedPalette: 'Delete saved palette {name}', libraryEmpty: 'Save a palette, then click its color strip to restore it.',
   },
   'zh-TW': {
+    imageTab: '圖片取色', imageChoose: '選擇圖片', imageDrop: '拖入圖片，或選擇檔案。', imageLocal: '本機處理 · PNG、JPEG、WebP、GIF · 上限 20 MB', imageBusy: '正在提取顏色…', imageFailed: '無法取色，請換一張 PNG、JPEG、WebP 或 GIF 圖片重試。', imageTooLarge: '圖片過大，請選擇小於 20 MB、6400 萬像素的圖片。', imageUnsupported: '請選擇 PNG、JPEG、WebP 或 GIF 圖片。', imageEmpty: '找不到可見顏色，請選擇含有不透明內容的圖片。', imageSetBase: '設為基準色', imageSetAccent: '設為強調色', imageApplyDone: '已套用', imageApplied: '已將 {hex} 套用為{target}。', imageRemove: '移除圖片', imagePreview: '選取的圖片',
+
     tuningTab: '微調', previewTab: '預覽', libraryTab: '已存色板',
     expandLayout: '展開預覽', collapseLayout: '收起工具區', workspaceTools: '色板工具',
-    appTitle: '色彩配色器', appDescription: '輸入 hex 顏色，生成配色方案與主題色彩 token。',
+    appTitle: 'TadaHue', appDescription: '輸入 hex 顏色，生成配色方案與主題色彩 token。',
     language: '語言', english: 'English', traditionalChinese: '繁體中文', light: '亮色', dark: '暗色', both: '兩者',
     switchToLight: '切換為亮色主題', switchToDark: '切換為暗色主題', manualTheme: '已手動選擇', followSystem: '跟隨系統中',
     eyedropper: '取色', savePalette: '儲存色板', saved: '已儲存 ✓', savedPalettes: '已儲存色板',

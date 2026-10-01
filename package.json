@@ -1,11 +1,12 @@
 {
-  "name": "color-palette",
+  "name": "tadahue",
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "Color palette generator — Tailwind-style scales and color schemes",
+  "description": "A desktop color toolkit for creating harmonious palettes, generating color scales, extracting colors from images, previewing light and dark themes, and exporting CSS, Tailwind, or JSON.",
+  "license": "MIT",
   "author": "Taosaunter",
-  "homepage": "https://github.com/taosaunter/color-palette",
+  "homepage": "https://github.com/taosaunter/tadahue",
   "main": "electron/main.mjs",
   "scripts": {
     "dev": "vite",
@@ -20,8 +21,8 @@
     "lint:fix": "eslint . --fix"
   },
   "build": {
-    "appId": "com.emi.colorpalette",
-    "productName": "Color Palette",
+    "appId": "com.taosaunter.tadahue",
+    "productName": "TadaHue",
     "directories": {
       "output": "release"
     },
@@ -32,15 +33,36 @@
       "electron/**/*.html",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "assets/icon-512x512.png",
+        "to": "tadahue.png"
+      }
+    ],
     "linux": {
       "target": [
         "AppImage"
       ],
-      "category": "Graphics"
+      "category": "Graphics",
+      "icon": "assets/icon-512x512.png"
+    },
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon-256x256.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "assets/icon-512x512.icns"
     }
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "colorthief": "^3.5.0",
     "culori": "^4.0.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

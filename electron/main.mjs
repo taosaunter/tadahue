@@ -21,6 +21,9 @@ function createWindow() {
     minHeight: 520,
     height: 560,
     useContentSize: true,
+    icon: app.isPackaged
+      ? join(process.resourcesPath, "tadahue.png")
+      : join(__dirname, "../assets/icon-512x512.png"),
     webPreferences: {
       preload: join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -31,7 +34,8 @@ function createWindow() {
 
   // Only this window's renderer can request the two supported workspace widths.
   const resizeWorkspace = (event, expanded) => {
-    if (event.sender !== win.webContents || typeof expanded !== "boolean") return;
+    if (event.sender !== win.webContents || typeof expanded !== "boolean")
+      return;
     if (win.isFullScreen()) {
       win.once("leave-full-screen", () => resizeWorkspace(event, expanded));
       win.setFullScreen(false);
@@ -44,10 +48,16 @@ function createWindow() {
     const area = screen.getDisplayMatching(bounds).workArea;
     const width = Math.min((expanded ? 1020 : 356) + frameWidth, area.width);
     win.setMinimumSize(356 + frameWidth, 520 + bounds.height - content.height);
-    win.setBounds({ ...bounds, width, x: Math.max(area.x, Math.min(bounds.x, area.x + area.width - width)) });
+    win.setBounds({
+      ...bounds,
+      width,
+      x: Math.max(area.x, Math.min(bounds.x, area.x + area.width - width)),
+    });
   };
   ipcMain.on("workspace:expanded", resizeWorkspace);
-  win.on("closed", () => ipcMain.removeListener("workspace:expanded", resizeWorkspace));
+  win.on("closed", () =>
+    ipcMain.removeListener("workspace:expanded", resizeWorkspace),
+  );
 
   // Dev: connect to Vite dev server. Prod: load built files.
   if (process.env.VITE_DEV_SERVER_URL) {
@@ -60,7 +70,7 @@ function createWindow() {
   return win;
 }
 
-const PICKER_SHOT = "/tmp/color-palette-picker.png";
+const PICKER_SHOT = "/tmp/tadahue-picker.png";
 
 function captureScreen() {
   return new Promise((resolve, reject) => {

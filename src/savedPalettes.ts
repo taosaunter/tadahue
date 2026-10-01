@@ -12,6 +12,7 @@ import {
   type ThemePalette,
 } from "./palette.ts";
 
+// Keep these keys stable so upgrades retain saved palettes and can migrate history.
 export const LIBRARY_KEY = "color-palette-snapshots-v1";
 export const LEGACY_KEY = "color-palette-history";
 export const LIBRARY_LIMIT = 20;

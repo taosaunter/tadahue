@@ -86,27 +86,30 @@ function Dashboard() {
           </span>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2 text-[11px]">
-        <span className="bg-selected text-ink rounded-md px-2 py-1">
-          {t("featured")}
-        </span>
-        <span className="bg-disabled-muted text-disabled rounded-md px-2 py-1">
-          {t("draft")}
-        </span>
-        <span className="border-focus text-ink rounded-md border-2 px-2 py-0.5">
-          {t("review")}
-        </span>
-        <span className="bg-accent text-on-accent rounded-md px-2 py-1">
-          {t("design")}
-        </span>
-      </div>
-      <div className="flex gap-2">
-        <span className="bg-primary text-on-primary rounded-lg px-3 py-1.5 text-xs">
-          {t("continue")}
-        </span>
-        <span className="border-line bg-surface-raised text-ink rounded-lg border px-3 py-1.5 text-xs">
-          {t("cancel")}
-        </span>
+
+      <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-2 text-xs">
+          <span className="bg-selected text-ink rounded-md px-2 py-1">
+            {t("featured")}
+          </span>
+          <span className="bg-disabled-muted text-disabled rounded-md px-2 py-1">
+            {t("draft")}
+          </span>
+          <span className="border-focus text-ink rounded-md border-2 px-2 py-1">
+            {t("review")}
+          </span>
+          <span className="bg-accent text-on-accent rounded-md px-2 py-1">
+            {t("design")}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <span className="bg-primary text-on-primary rounded-md px-2 py-1 text-xs">
+            {t("continue")}
+          </span>
+          <span className="border-line bg-surface-raised text-ink rounded-md border px-2 py-1 text-xs">
+            {t("cancel")}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -115,7 +118,7 @@ function Dashboard() {
 function Landing() {
   const { t } = useLocale();
   return (
-    <div className="space-y-5 py-3">
+    <div className="space-y-2 py-2">
       <nav className="flex items-center justify-between">
         <strong className="text-ink text-sm">Studio North</strong>
         <span className="text-ink-muted text-xs">Work · About · Contact</span>
@@ -164,7 +167,7 @@ function Landing() {
 function Form() {
   const { t } = useLocale();
   return (
-    <div className="mx-auto max-w-sm space-y-3 py-2">
+    <div className="mx-auto max-w-sm space-y-2.5 py-1">
       <h3 className="text-ink text-lg font-semibold">{t("welcomeBack")}</h3>
       <p className="text-ink-muted text-xs">{t("signInDescription")}</p>
       <div className="text-ink block text-xs">
@@ -192,7 +195,7 @@ function Form() {
         />
         {t("rememberMe")}
       </div>
-      <div className="flex gap-2">
+      <div className="flex justify-end gap-2">
         <span className="bg-primary text-on-primary rounded-lg px-4 py-2 text-xs">
           {t("signIn")}
         </span>
@@ -248,8 +251,8 @@ export default function ThemePreview({
   const { t } = useLocale();
   const [sample, setSample] = useState<Sample>("dashboard");
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div className="theme-preview">
+      <div className="preview-selector mb-3 flex flex-wrap items-center justify-between gap-2">
         <div
           role="group"
           aria-label={t("previewTitle")}
@@ -271,8 +274,8 @@ export default function ThemePreview({
           ))}
         </div>
       </div>
-      <div className="grid gap-3">
-        <MiniApp palette={palette} theme={theme} sample={sample}/>
+      <div className="preview-frame grid gap-3">
+        <MiniApp palette={palette} theme={theme} sample={sample} />
       </div>
     </div>
   );

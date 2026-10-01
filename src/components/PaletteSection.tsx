@@ -12,13 +12,15 @@ export default function PaletteSection({
   labels,
 }: PaletteSectionProps) {
   return (
-    <section>
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-ink-muted">
+    <section className="flex flex-col gap-4">
+      <h2 className="text-ink-muted mt-4 text-xs font-semibold tracking-widest uppercase">
         {title}
       </h2>
       <div
-        className="grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${Math.min(colors.length, 5)}, minmax(0, 1fr))` }}
+        className="grid gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${Math.min(colors.length, 5)}, minmax(0, 1fr))`,
+        }}
       >
         {colors.map((hex, i) => (
           <ColorSwatch key={i} hex={hex} label={labels?.[i]} />

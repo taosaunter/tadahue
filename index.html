@@ -7,10 +7,11 @@
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%234F46E5'/></svg>"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Color Palette</title>
+    <title>TadaHue</title>
     <script>
       (function () {
         try {
+          // Keep these keys stable so existing installs retain their preferences.
           var stored = localStorage.getItem("color-palette-theme");
           document.documentElement.lang =
             localStorage.getItem("color-palette-locale") === "zh-TW"

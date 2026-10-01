@@ -161,30 +161,47 @@ export default function App() {
 
   return (
     <div className="app-shell">
-
       <ThemeGenerator
         theme={theme}
-        settings={<>          <div
-            className="border-line bg-surface-raised flex rounded-lg border p-0.5"
-            aria-label={t("language")}
-          >
+        settings={
+          <>
+            {" "}
+            <div
+              className="border-line bg-surface-raised flex rounded-lg border p-0.5"
+              aria-label={t("language")}
+            >
+              <button
+                type="button"
+                onClick={() => setLocale("en")}
+                aria-pressed={locale === "en"}
+                className={`rounded-md px-2 py-1 text-xs ${locale === "en" ? "bg-primary text-on-primary" : "text-ink-muted"}`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale("zh-TW")}
+                aria-pressed={locale === "zh-TW"}
+                className={`rounded-md px-2 py-1 text-xs ${locale === "zh-TW" ? "bg-primary text-on-primary" : "text-ink-muted"}`}
+              >
+                繁
+              </button>
+            </div>
             <button
               type="button"
-              onClick={() => setLocale("en")}
-              aria-pressed={locale === "en"}
-              className={`rounded-md px-2 py-1 text-xs ${locale === "en" ? "bg-primary text-on-primary" : "text-ink-muted"}`}
+              onClick={toggle}
+              className="icon-button"
+              data-tooltip={t(
+                theme === "dark" ? "switchToLight" : "switchToDark",
+              )}
+              aria-label={t(
+                theme === "dark" ? "switchToLight" : "switchToDark",
+              )}
             >
-              EN
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
             </button>
-            <button
-              type="button"
-              onClick={() => setLocale("zh-TW")}
-              aria-pressed={locale === "zh-TW"}
-              className={`rounded-md px-2 py-1 text-xs ${locale === "zh-TW" ? "bg-primary text-on-primary" : "text-ink-muted"}`}
-            >
-              繁中
-            </button>
-          </div><button type="button" onClick={toggle} className="icon-button" data-tooltip={t(theme === "dark" ? "switchToLight" : "switchToDark")} aria-label={t(theme === "dark" ? "switchToLight" : "switchToDark")}>{theme === "dark" ? <SunIcon/> : <MoonIcon/>}</button></>}
+          </>
+        }
         onSave={handleSave}
         seed={hex}
         accent={accent}
@@ -206,21 +223,21 @@ export default function App() {
         }
         extras={
           isValid && (
-            <div className="space-y-3 rounded-lg p-2">
-                <PaletteSection
-                  title={t("scale")}
-                  colors={schemes.scale}
-                  labels={TITLE_LABELS}
-                />
-                <PaletteSection
-                  title={t("analogous")}
-                  colors={schemes.analogous}
-                />
-                <PaletteSection
-                  title={t("monochromatic")}
-                  colors={schemes.monochromatic}
-                />
-                <PaletteSection title={t("shades")} colors={schemes.shades} />
+            <div className="space-y-2 rounded-lg p-2">
+              <PaletteSection
+                title={t("scale")}
+                colors={schemes.scale}
+                labels={TITLE_LABELS}
+              />
+              <PaletteSection
+                title={t("analogous")}
+                colors={schemes.analogous}
+              />
+              <PaletteSection
+                title={t("monochromatic")}
+                colors={schemes.monochromatic}
+              />
+              <PaletteSection title={t("shades")} colors={schemes.shades} />
             </div>
           )
         }

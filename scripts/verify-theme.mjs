@@ -410,7 +410,11 @@ async function main() {
       label.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
       return { outline: getComputedStyle(label).outlineStyle, marked: card.querySelectorAll('[data-active="true"]').length };
     })()`);
-    check("預覽懸停不出現 token 外框", previewOutline.outline === "none" && previewOutline.marked === 0, JSON.stringify(previewOutline));
+    check(
+      "預覽懸停不出現 token 外框",
+      previewOutline.outline === "none" && previewOutline.marked === 0,
+      JSON.stringify(previewOutline),
+    );
 
     const copied = await page.evaluate(
       `[...document.querySelectorAll('section button')].find(b => /Copy CSS|复制 CSS/.test(b.textContent)).click(); 'clicked'`,
@@ -491,7 +495,7 @@ async function main() {
     );
 
     await page.evaluate(
-      `([...document.querySelectorAll('header button')].find(b => b.textContent.trim() === '繁中')).click(); true`,
+      `([...document.querySelectorAll('header button')].find(b => b.textContent.trim() === '繁')).click(); true`,
     );
     await sleep(250);
     const localeProbe = await page.evaluate(
@@ -504,12 +508,18 @@ async function main() {
         localeProbe.input === "種子色 hex",
       `lang=${localeProbe.lang} title=${localeProbe.title} input=${localeProbe.input}`,
     );
-    await page.evaluate(`document.querySelectorAll('section details')[1].open = true; true`);
+    await page.evaluate(
+      `document.querySelectorAll('section details')[1].open = true; true`,
+    );
     const localizedChecks = await page.evaluate(`(() => {
       const text = document.querySelectorAll('section details')[1].innerText;
       return { body: text.includes('正文／背景'), warning: text.includes('警告色文字／警告淺底'), info: text.includes('資訊文字／資訊淺底') };
     })()`);
-    check("WCAG 檢查名稱在繁中正確對應", Object.values(localizedChecks).every(Boolean), JSON.stringify(localizedChecks));
+    check(
+      "WCAG 檢查名稱在繁中正確對應",
+      Object.values(localizedChecks).every(Boolean),
+      JSON.stringify(localizedChecks),
+    );
   } finally {
     page.close();
     server?.close();

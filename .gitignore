@@ -5,3 +5,7 @@ tmp/
 *.log
 graphify-out/
 .prettierrc
+docs/
+.impeccable/
+.agents/
+.codex/
