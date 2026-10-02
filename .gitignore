@@ -5,7 +5,7 @@ tmp/
 *.log
 graphify-out/
 .prettierrc
-docs/*
+notes/
 !docs/DEVELOPMENT.md
 .impeccable/
 .agents/

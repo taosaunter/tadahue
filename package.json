@@ -5,7 +5,7 @@
   "type": "module",
   "description": "A desktop color toolkit for creating harmonious palettes, generating color scales, extracting colors from images, previewing light and dark themes, and exporting CSS, Tailwind, or JSON.",
   "license": "MIT",
-  "author": "Taosaunter",
+  "author": "Vista",
   "homepage": "https://github.com/taosaunter/tadahue",
   "main": "electron/main.mjs",
   "scripts": {

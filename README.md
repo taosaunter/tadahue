@@ -1,6 +1,8 @@
 # TadaHue
 
-[繁體中文](README-TW.md)
+<div align="right">
+  <a href="./docs/README-TW.md">繁體中文</a>
+</div>
 
 A desktop color toolkit for creating palettes, exploring color harmonies, and previewing themes.
 
@@ -40,8 +42,6 @@ pnpm dev             # Start the browser development server
 pnpm electron:dev    # Launch the desktop app
 ```
 
-See the [developer guide](docs/DEVELOPMENT.md) for the source layout and implementation notes.
-
 ## Build and checks
 
 ```bash
@@ -56,4 +56,4 @@ Build Windows and macOS packages on a matching machine or CI runner.
 
 ## License
 
-TadaHue is licensed under the MIT License. Linux Wayland support uses `@homebridge/dbus-native`; see [third-party notices](THIRD_PARTY_NOTICES.md) for its dependency licenses.
+TadaHue is licensed under the MIT License. Linux Wayland support uses `@homebridge/dbus-native`; see [third-party notices](./docs/THIRD_PARTY_NOTICES.md) for its dependency licenses.

@@ -1,10 +1,12 @@
 # TadaHue
 
-[English](README.md)
+<div align="right">
+  <a href="../README.md">English</a>
+</div>
 
 桌面配色工具，協助你探索配色關係、建立色板並預覽主題。
 
-![TadaHue 桌面應用程式，顯示配色工具與主題預覽](assets/tadahue_001.webp)
+![TadaHue 桌面應用程式，顯示配色工具與主題預覽](../assets/tadahue_001.webp)
 
 ## 功能
 
@@ -18,13 +20,13 @@
 
 ## 桌面平台
 
-| 平台 | 套件格式 | 螢幕吸管 |
-| --- | --- | --- |
-| Linux | AppImage | X11 擷取或 Wayland 截圖 Portal |
-| Windows | NSIS 安裝程式或 portable | Electron 螢幕擷取 |
-| macOS | DMG | Electron 螢幕擷取；需要螢幕錄製權限 |
+| 平台    | 套件格式                 | 螢幕吸管                            |
+| ------- | ------------------------ | ----------------------------------- |
+| Linux   | AppImage                 | X11 擷取或 Wayland 截圖 Portal      |
+| Windows | NSIS 安裝程式或 portable | Electron 螢幕擷取                   |
+| macOS   | DMG                      | Electron 螢幕擷取；需要螢幕錄製權限 |
 
-權限需求與 Linux 顯示選項請參閱[平台支援說明](docs/PLATFORM_SUPPORT-TW.md)。
+權限需求與 Linux 顯示選項請參閱[平台支援說明](PLATFORM_SUPPORT-TW.md)。
 
 ## 隱私
 
@@ -39,8 +41,6 @@ pnpm install
 pnpm dev             # 啟動瀏覽器開發伺服器
 pnpm electron:dev    # 啟動桌面版
 ```
-
-原始碼目錄與實作說明請參閱[開發導覽](docs/DEVELOPMENT.md)。
 
 ## 建置與檢查
 
