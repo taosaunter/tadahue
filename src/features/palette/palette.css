@@ -1,0 +1,256 @@
+/* RGB editor, color wheel, and shared palette/token swatches. */
+
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.swatch-button {
+  position: relative;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+}
+
+.token-grid .swatch-button:nth-child(7n + 1)::after {
+  left: 0;
+  transform: none;
+}
+
+.token-grid .swatch-button:nth-child(7n)::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.wheel-wrap {
+  position: relative;
+  width: 208px;
+  margin: 10px auto 0;
+}
+
+.wheel-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 8.32px;
+  border-radius: 50%;
+  background: conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.color-wheel {
+  position: relative;
+  display: block;
+  width: 100%;
+  touch-action: none;
+}
+
+.wheel-handle {
+  cursor: grab;
+  outline: none;
+}
+
+.wheel-handle:active {
+  cursor: grabbing;
+}
+
+.wheel-focus {
+  opacity: 0;
+}
+
+.wheel-handle:focus-visible .wheel-focus {
+  opacity: 1;
+}
+
+.color-swatch-trigger {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  cursor: pointer;
+}
+
+.color-swatch-trigger span {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.color-swatch-trigger:hover {
+  border-color: var(--primary);
+}
+
+.rgb-popover {
+  position: fixed;
+  margin: 0;
+  width: 272px;
+  max-width: calc(100vw - 24px);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #0002;
+}
+
+.rgb-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.rgb-heading strong {
+  font-weight: 500;
+}
+
+.rgb-heading strong span {
+  margin-left: 6px;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.rgb-heading .quiet-button {
+  padding: 4px 8px;
+}
+
+.rgb-spectrum {
+  position: relative;
+  height: 144px;
+  border-radius: 6px;
+  background-image:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.rgb-spectrum:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.rgb-spectrum-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 3px #0009;
+  pointer-events: none;
+}
+
+.rgb-hue {
+  display: block;
+  margin: 12px 0;
+}
+
+.rgb-hue input {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    #f00,
+    #ff0,
+    #0f0,
+    #0ff,
+    #00f,
+    #f0f,
+    #f00
+  );
+  cursor: pointer;
+}
+
+.rgb-hue input::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 1px 3px #0005;
+}
+
+.rgb-hue input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 1px 3px #0005;
+}
+
+.rgb-channels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.rgb-channel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.rgb-channel input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  .token-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .token-grid .swatch-button:nth-child(7n + 1)::after {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .token-grid .swatch-button:nth-child(7n)::after {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .token-grid .swatch-button:nth-child(4n + 1)::after {
+    left: 0;
+    transform: none;
+  }
+
+  .token-grid .swatch-button:nth-child(4n)::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+}
+
+@media (min-width: 701px) {
+  .workspace-expanded .controls-pane > div:has(.wheel-wrap) {
+    margin-bottom: 16px;
+  }
+}

@@ -68,7 +68,7 @@ async function openChrome(url, chromePath, { colorScheme = "light" } = {}) {
 
   const port = await new Promise((ok, fail) => {
     const timer = setTimeout(
-      () => fail(new Error("等 DevTools 端口超时")),
+      () => fail(new Error("Timed out waiting for DevTools")),
       15000,
     );
     let buf = "";
@@ -129,7 +129,10 @@ async function openChrome(url, chromePath, { colorScheme = "light" } = {}) {
       awaitPromise: true,
     });
     if (r.exceptionDetails)
-      throw new Error(r.exceptionDetails.exception?.description ?? "eval 失败");
+      throw new Error(
+        r.exceptionDetails.exception?.description ??
+          "Browser evaluation failed",
+      );
     return r.result.value;
   };
 
@@ -170,369 +173,204 @@ async function openChrome(url, chromePath, { colorScheme = "light" } = {}) {
   };
 }
 
-const PROBE = `(() => {
-  const html = document.documentElement;
-  return {
-    bg: getComputedStyle(document.body).backgroundColor,
-    classes: html.className,
-    toggle: (() => {
-      const b = document.querySelector('header button:not([aria-pressed])');
-      return b ? b.textContent.trim() : null;
-    })(),
-    stored: localStorage.getItem('color-palette-theme'),
-  };
-})()`;
-
-const CARDS = `[...document.querySelectorAll('div[style*="--color-surface"]')]`;
-
-const cardReport = `(() => {
-  const cards = ${CARDS};
-  return {
-    count: cards.length,
-    backgrounds: cards.map(c => getComputedStyle(c).backgroundColor),
-  };
-})()`;
-
-const setMode = (label) => `(() => {
-  const b = [...document.querySelectorAll('section button')].find(x => x.textContent.trim() === '${label}');
-  if (!b) return 'not-found';
-  b.click();
-  return 'clicked';
-})()`;
-
-const cardColors = `(() => {
-  const card = ${CARDS}[0];
-  if (!card) return [];
-  const props = ['backgroundColor', 'color', 'borderTopColor', 'borderBottomColor',
-    'borderLeftColor', 'borderRightColor', 'outlineColor'];
-  const seen = new Set();
-  for (const el of [card, ...card.querySelectorAll('*')]) {
-    const cs = getComputedStyle(el);
-    for (const p of props) {
-      const m = cs[p].match(/^rgba?\\((\\d+), (\\d+), (\\d+)(?:, ([\\d.]+))?\\)$/);
-      if (!m || (m[4] !== undefined && Number(m[4]) === 0)) continue;
-      const hex = '#' + [m[1], m[2], m[3]].map(n => Number(n).toString(16).padStart(2, '0')).join('');
-      seen.add(hex);
-    }
-  }
-  return [...seen];
-})()`;
-
-const setInput = (hex) => `(() => {
-  const input = document.querySelector('input[type="text"]');
-  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-  setter.call(input, '${hex}');
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-  return input.value;
-})()`;
-
-const toRgb = (hex) => {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
-};
-
+// Verify the current six-tab workspace rather than the retired dual-card preview UI.
 async function main() {
   const chromePath = findChrome();
   if (!chromePath) {
     console.log(
-      "跳過：沒找到 Chrome（設 CHROME=/path/to/chrome 或裝 playwright 瀏覽器）",
+      "Skipped: set CHROME=/path/to/chromium or install a Playwright browser.",
     );
     return 0;
   }
-  if (!process.argv[2] && !existsSync(join(DIST, "index.html"))) {
-    console.error("dist/ 不存在，先跑 pnpm build");
-    return 1;
-  }
-
-  let server;
-  const url =
-    process.argv[2] ??
-    (await (async () => {
-      server = await serveDist();
-      return `http://127.0.0.1:${server.address().port}/`;
-    })());
-  console.log(`驗證目標 ${url}\n`);
-
-  const { generateThemePalette } = await import("../src/palette.ts");
-  const roleHex = (p, theme, name) => p[theme].find((r) => r.name === name).hex;
-
-  const page = await openChrome(url, chromePath);
+  const { generateThemePalette } = await import("../src/color/palette.ts");
+  let server, page;
   const results = [];
-  const check = (name, pass, detail = "") => {
-    results.push(pass);
-    console.log(`${pass ? "✔" : "✘"} ${name}${detail ? ` — ${detail}` : ""}`);
+  const check = (label, passed) => {
+    results.push(passed);
+    console.log(`${passed ? "PASS" : "FAIL"}: ${label}`);
   };
-
   try {
-    const base = generateThemePalette("#764646");
-    const bg = (p, theme) => toRgb(roleHex(p, theme, "background"));
-    const surfaceOf = (p, theme) => toRgb(roleHex(p, theme, "surface"));
-
-    const initial = await page.evaluate(PROBE);
-    check(
-      "系統偏好亮 → 應用亮色",
-      initial.bg === bg(base, "light") && initial.classes.includes("light"),
-      `bg=${initial.bg} class="${initial.classes}"`,
-    );
-
-    await page.emulate("dark");
-    await sleep(300);
-    const followed = await page.evaluate(PROBE);
-    check(
-      "系統偏好切暗 → 應用即時跟隨（無需重載）",
-      followed.bg === bg(base, "dark"),
-      `bg ${initial.bg} → ${followed.bg}`,
-    );
-
-    check(
-      "header 有主題切換按鈕且有可存取名稱",
-      followed.toggle !== null,
-      `按鈕文案="${followed.toggle}"`,
-    );
-
-    const both = await page.evaluate(cardReport);
-    check("默认 BOTH → 两张预览卡", both.count === 2, `cards=${both.count}`);
-
-    await page.evaluate(setMode("Light"));
-    await sleep(250);
-    const light = await page.evaluate(cardReport);
-    const surface = {
-      light: surfaceOf(base, "light"),
-      dark: surfaceOf(base, "dark"),
+    const url =
+      process.argv[2] ??
+      (await (async () => {
+        server = await serveDist();
+        return `http://127.0.0.1:${server.address().port}/`;
+      })());
+    page = await openChrome(url, chromePath);
+    const click = async (selector) => {
+      await page.evaluate(
+        `document.querySelector(${JSON.stringify(selector)}).click()`,
+      );
+      await sleep(80);
     };
-    check(
-      "LIGHT 模式 → 一張卡片且是亮色板",
-      light.count === 1 && light.backgrounds[0] === surface.light,
-      `cards=${light.count} bg=${light.backgrounds[0]}`,
-    );
-
-    await page.evaluate(setMode("Dark"));
-    await sleep(250);
-    const dark = await page.evaluate(cardReport);
-    check(
-      "DARK 模式 → 一張卡片且是暗色板",
-      dark.count === 1 && dark.backgrounds[0] === surface.dark,
-      `cards=${dark.count} bg=${dark.backgrounds[0]}`,
-    );
-
-    await page.evaluate(setMode("Light"));
-    await sleep(250);
-    const scoped = await page.evaluate(cardReport);
-    const appStillDark = (await page.evaluate(PROBE)).bg;
-    check(
-      "暗色 app 內的亮色預覽卡不受 app 主題影響",
-      scoped.backgrounds[0] === surface.light &&
-        appStillDark === bg(base, "dark"),
-      `card=${scoped.backgrounds[0]}（應爲亮色 surface ${surface.light}）app=${appStillDark}`,
-    );
-
-    const palette = base;
-    for (const [theme, mode] of [
-      ["light", "Light"],
-      ["dark", "Dark"],
-    ]) {
-      await page.evaluate(setMode(mode));
-      await sleep(250);
-      const rendered = new Set(await page.evaluate(cardColors));
-      const missing = palette[theme]
-        .filter((r) => !rendered.has(r.hex))
-        .map((r) => r.name);
-      check(
-        `${mode.toUpperCase()} 預覽涵蓋全部 ${palette[theme].length} 個角色`,
-        missing.length === 0,
-        missing.length
-          ? `缺 ${missing.join(", ")}`
-          : `渲染出 ${rendered.size} 種顏色`,
+    const appearance = () =>
+      page.evaluate(
+        `({theme: document.documentElement.className, background: getComputedStyle(document.body).backgroundColor, stored: localStorage.getItem('color-palette-theme')})`,
       );
-    }
-
-    await page.evaluate(setMode("Both"));
-    await page.evaluate(setInput("#2563eb"));
-    await sleep(350);
-    const bluePalette = generateThemePalette("#2563eb");
-    const blueCards = await page.evaluate(cardReport);
-    const blueApp = await page.evaluate(PROBE);
+    const expectedRgb = (hex) =>
+      `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
+    const expectedPalette = async () => {
+      const [seed, accent] = await page.evaluate(
+        `[...document.querySelectorAll('.color-input')].map(input=>input.value)`,
+      );
+      return generateThemePalette(seed, "balanced", undefined, accent);
+    };
+    const role = (palette, mode, name) =>
+      palette[mode].find((item) => item.name === name).hex;
+    const initial = await appearance();
     check(
-      "輸入色改變 → 預覽即時跟著換",
-      blueCards.backgrounds[0] === surfaceOf(bluePalette, "light") &&
-        blueCards.backgrounds[1] === surfaceOf(bluePalette, "dark"),
-      `light=${blueCards.backgrounds[0]} dark=${blueCards.backgrounds[1]}`,
+      "System light appearance applies to the app",
+      initial.theme.includes("light"),
     );
-    check(
-      "輸入色改變 → 應用自身跟著換（:root 內聯變數）",
-      blueApp.bg === bg(bluePalette, "dark") && blueApp.bg !== bg(base, "dark"),
-      `app bg ${bg(base, "dark")} → ${blueApp.bg}`,
-    );
-    await page.evaluate(setInput("#764646"));
-    await sleep(300);
-
-    await page.evaluate(setInput("#zzz"));
-    await sleep(300);
-    const invalid = await page.evaluate(`(() => {
-      const cards = ${CARDS};
-      return { cards: cards.length, hint: /Invalid hex|無效的 hex/.test(document.body.innerText) };
-    })()`);
-    check(
-      "無效 hex → 不渲染預覽卡並給予提示",
-      invalid.cards === 0 && invalid.hint === true,
-      `cards=${invalid.cards} hint=${invalid.hint}`,
-    );
-    await page.evaluate(setInput("#764646"));
-    await sleep(300);
-
-    await page.evaluate(
-      `document.querySelectorAll('section details')[1].open = true; true`,
-    );
-    await sleep(200);
-    const swatch = await page.evaluate(`(() => {
-      const b = [...document.querySelectorAll('section button')].find(x => x.title.includes('#'));
-      b.click();
-      return b.getAttribute('title').match(/#[0-9a-f]{6}/i)[0];
-    })()`);
-    await sleep(250);
-    const label = await page.evaluate(
-      `[...document.querySelectorAll('section button')].find(x => x.title.includes('#')).querySelector('span:last-child').textContent`,
-    );
-    let clipboard = null;
-    try {
-      clipboard = await page.evaluate("navigator.clipboard.readText()");
-    } catch {
-      // Clipboard access is optional in headless mode.
-    }
-    check(
-      "點色票複製 HEX",
-      /Copied|已複製/.test(label) && (!clipboard || clipboard === swatch),
-      `複製 ${swatch}，剪貼簿=${clipboard ?? "不可讀"}，回饋="${label}"`,
-    );
-    const previewOutline = await page.evaluate(`(() => {
-      const card = document.querySelector('div[style*="--color-surface"]');
-      const label = card.querySelector('strong');
-      label.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-      return { outline: getComputedStyle(label).outlineStyle, marked: card.querySelectorAll('[data-active="true"]').length };
-    })()`);
-    check(
-      "預覽懸停不出現 token 外框",
-      previewOutline.outline === "none" && previewOutline.marked === 0,
-      JSON.stringify(previewOutline),
-    );
-
-    const copied = await page.evaluate(
-      `[...document.querySelectorAll('section button')].find(b => /Copy CSS|复制 CSS/.test(b.textContent)).click(); 'clicked'`,
-    );
-    await sleep(250);
-    let cssText = null;
-    try {
-      cssText = await page.evaluate("navigator.clipboard.readText()");
-    } catch {
-      // Clipboard access is optional in headless mode.
-    }
-    check(
-      "複製 CSS 變數含三塊（@theme / :root / :root.dark）",
-      copied === "clicked" &&
-        (!cssText ||
-          (cssText.includes("@theme") &&
-            cssText.includes(":root.light") &&
-            cssText.includes(":root.dark"))),
-      cssText ? `長度 ${cssText.length}` : "剪貼簿不可讀",
-    );
-    const beforeToggle = await page.evaluate(PROBE);
-    await page.evaluate(
-      `document.querySelector('header button:not([aria-pressed])').click(); true`,
-    );
-    await sleep(250);
-    const afterToggle = await page.evaluate(PROBE);
-    check(
-      "點擊切換 → 主題立即改變且寫入 localStorage",
-      afterToggle.bg !== beforeToggle.bg && afterToggle.stored !== null,
-      `bg ${beforeToggle.bg} → ${afterToggle.bg}；stored=${afterToggle.stored}`,
-    );
-
     await page.emulate("dark");
-    await sleep(300);
-    const manualWins = await page.evaluate(PROBE);
+    await sleep(150);
     check(
-      "手動選擇優先於系統偏好",
-      manualWins.bg === afterToggle.bg &&
-        manualWins.classes.includes(afterToggle.stored),
-      `系統=dark，手動=${afterToggle.stored} → bg=${manualWins.bg}`,
+      "System changes update appearance without reload",
+      (await appearance()).theme.includes("dark"),
+    );
+    await click('button[aria-controls="workspace-tools"]');
+    const baseline = await expectedPalette();
+    check(
+      "Dark app background uses generated tokens",
+      (await appearance()).background ===
+        expectedRgb(role(baseline, "dark", "background")),
     );
 
-    await page.reload();
-    for (let i = 0; i < 100; i++) {
-      const ready = await page.evaluate(
-        `document.readyState === 'complete' && !!document.querySelector('header button:not([aria-pressed])')`,
+    for (const tab of [
+      "preview",
+      "tuning",
+      "tokens",
+      "palettes",
+      "image",
+      "library",
+    ]) {
+      await click(`#tab-${tab}`);
+      const geometry = await page.evaluate(`(()=>{
+        const rect=s=>document.querySelector(s).getBoundingClientRect();
+        const left=rect('.controls-pane'),right=rect('.tools-pane');
+        const toolbar=rect('.panel-toolbar'),tabs=rect('.workspace-tabs');
+        return {equal:Math.abs(left.height-right.height)<1,aligned:Math.abs(toolbar.top-tabs.top)<1,
+          selected:document.querySelector('#tab-${tab}').getAttribute('aria-selected')==='true',
+          hidden:document.querySelector('#panel-${tab}').hidden};
+      })()`);
+      check(
+        `${tab}: equal pane heights and aligned toolbars`,
+        geometry.equal && geometry.aligned,
       );
-      if (ready) break;
-      await sleep(100);
-    }
-    await sleep(300);
-    const afterReload = await page.evaluate(PROBE);
-    check(
-      "刷新後保持手動選擇（FOUC 腳本讀同一份 localStorage）",
-      afterReload.bg === afterToggle.bg &&
-        afterReload.stored === afterToggle.stored,
-      `bg=${afterReload.bg} stored=${afterReload.stored}`,
-    );
-
-    await page.evaluate(
-      `localStorage.setItem('color-palette-history', 'null'); true`,
-    );
-    await page.reload();
-    for (let i = 0; i < 100; i++) {
-      const ready = await page.evaluate(
-        `document.readyState === 'complete' && !!document.querySelector('header button:not([aria-pressed])')`,
+      check(
+        `${tab}: selected tab exposes its panel`,
+        geometry.selected && !geometry.hidden,
       );
-      if (ready) break;
-      await sleep(100);
     }
+    await click("#tab-tokens");
+    check(
+      "All 28 tokens have swatches",
+      await page.evaluate(
+        `document.querySelectorAll('#panel-tokens .swatch-button').length===28`,
+      ),
+    );
+    await click("#panel-tokens .swatch-button");
+    const copied = await page.evaluate(`navigator.clipboard.readText()`);
+    check("Token swatches copy HEX values", copied === baseline.dark[0].hex);
+    await page.evaluate(
+      `window.__verifyClipboardWrite = navigator.clipboard.writeText; navigator.clipboard.writeText = () => Promise.reject(new Error('Clipboard unavailable'));`,
+    );
+    await click("#panel-tokens .swatch-button");
+    check(
+      "Clipboard failure keeps accessible feedback",
+      await page.evaluate(
+        `document.querySelector('#panel-tokens .swatch-button').getAttribute('aria-label').includes('Could not copy') && document.querySelector('#panel-tokens [role=status]').textContent.includes('Could not copy')`,
+      ),
+    );
+    await page.evaluate(
+      `navigator.clipboard.writeText = window.__verifyClipboardWrite; delete window.__verifyClipboardWrite;`,
+    );
+    await click("#tab-preview");
+    const previewBackground = await page.evaluate(
+      `getComputedStyle(document.querySelector('.preview-canvas')).backgroundColor`,
+    );
+    check(
+      "Preview uses the current theme's scoped surface",
+      previewBackground === expectedRgb(role(baseline, "dark", "surface")),
+    );
+    await click('button[aria-label="Switch to light theme"]');
+    check(
+      "Manual appearance overrides system preference",
+      (await appearance()).theme.includes("light"),
+    );
+    const valueSetter = (value) =>
+      `(()=>{const input=document.querySelector('.color-input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,${JSON.stringify(value)});input.dispatchEvent(new Event('input',{bubbles:true}));})()`;
+    await page.evaluate(valueSetter("#2563eb"));
+    await sleep(100);
+    const blue = await expectedPalette();
+    check(
+      "Color edits update app tokens",
+      (await appearance()).background ===
+        expectedRgb(role(blue, "light", "background")),
+    );
+    check(
+      "Color edits update preview tokens",
+      (await page.evaluate(
+        `getComputedStyle(document.querySelector('.preview-canvas')).backgroundColor`,
+      )) === expectedRgb(role(blue, "light", "surface")),
+    );
+    await page.evaluate(valueSetter("#invalid"));
+    await sleep(80);
+    check(
+      "Invalid HEX shows a hint and removes the preview",
+      await page.evaluate(
+        `!document.querySelector('.preview-canvas') && /Invalid hex/.test(document.body.innerText)`,
+      ),
+    );
+    await page.evaluate(valueSetter("#764646"));
+    await sleep(80);
+    await click(".output-actions button:nth-child(2)");
+    const css = await page.evaluate(`navigator.clipboard.readText()`);
+    check(
+      "CSS export retains light and dark token blocks",
+      css.includes(":root.light") &&
+        css.includes(":root.dark") &&
+        css.includes("@theme"),
+    );
+    await click(".output-toolbar > button");
+    await click("#tab-library");
+    check(
+      "Saved palette appears in its tab",
+      await page.evaluate(
+        `document.querySelectorAll('.library-list li').length===1`,
+      ),
+    );
+    const stored = (await appearance()).stored;
+    await page.reload();
     await sleep(300);
-    const recovered = await page.evaluate(PROBE);
     check(
-      "損壞的歷史資料 → App 仍可啟動",
-      recovered.bg === afterToggle.bg &&
-        recovered.stored === afterToggle.stored,
-      `bg=${recovered.bg} stored=${recovered.stored}`,
+      "Manual appearance survives reload",
+      (await appearance()).stored === stored &&
+        (await appearance()).theme.includes(stored),
     );
-
-    await page.evaluate(
-      `([...document.querySelectorAll('header button')].find(b => b.textContent.trim() === '繁')).click(); true`,
-    );
-    await sleep(250);
-    const localeProbe = await page.evaluate(
-      `({ lang: document.documentElement.lang, title: document.querySelector('h1').textContent, input: document.querySelector('input[type="text"]').getAttribute('aria-label') })`,
-    );
+    await click('button[aria-controls="workspace-tools"]');
+    await click("#tab-library");
     check(
-      "切換繁中 → UI 與 html lang 同步",
-      localeProbe.lang === "zh-TW" &&
-        localeProbe.title === "色彩配色器" &&
-        localeProbe.input === "種子色 hex",
-      `lang=${localeProbe.lang} title=${localeProbe.title} input=${localeProbe.input}`,
+      "Saved palette survives reload",
+      await page.evaluate(
+        `document.querySelectorAll('.library-list li').length===1`,
+      ),
     );
-    await page.evaluate(
-      `document.querySelectorAll('section details')[1].open = true; true`,
+    console.log(
+      `\n${results.filter(Boolean).length}/${results.length} checks passed.`,
     );
-    const localizedChecks = await page.evaluate(`(() => {
-      const text = document.querySelectorAll('section details')[1].innerText;
-      return { body: text.includes('正文／背景'), warning: text.includes('警告色文字／警告淺底'), info: text.includes('資訊文字／資訊淺底') };
-    })()`);
-    check(
-      "WCAG 檢查名稱在繁中正確對應",
-      Object.values(localizedChecks).every(Boolean),
-      JSON.stringify(localizedChecks),
-    );
+    return results.every(Boolean) ? 0 : 1;
   } finally {
-    page.close();
+    page?.close();
     server?.close();
   }
-
-  const failed = results.filter((r) => !r).length;
-  console.log(`\n${results.length - failed}/${results.length} 通過`);
-  return failed ? 1 : 0;
 }
 
 main()
-  .then((code) => process.exit(code))
-  .catch((e) => {
-    console.error("驗證腳本出錯:", e);
-    process.exit(1);
+  .then((code) => {
+    process.exitCode = code;
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
   });

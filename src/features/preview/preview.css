@@ -1,0 +1,38 @@
+/* Preview frame sizing; sample markup lives in ./samples. */
+
+.preview-canvas {
+  min-height: 360px;
+}
+
+@media (max-width: 700px) {
+  .preview-canvas {
+    min-height: 0;
+  }
+}
+
+@media (min-width: 701px) {
+  .theme-preview {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .preview-selector {
+    flex-shrink: 0;
+  }
+
+  .preview-frame {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .preview-frame .preview-canvas {
+    min-height: 0;
+    height: 100%;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) var(--surface);
+  }
+}

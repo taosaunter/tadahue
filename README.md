@@ -1,24 +1,34 @@
 # TadaHue
 
-> A desktop color toolkit for creating harmonious palettes, generating color scales, extracting colors from images, and previewing light and dark themes.
-
 [繁體中文](README-TW.md)
+
+A desktop color toolkit for creating palettes, exploring color harmonies, and previewing themes.
+
+![TadaHue desktop app showing palette tools and a theme preview](assets/tadahue_001.webp)
 
 ## Features
 
-- Explore complementary, split-complementary, and triadic palettes with a draggable five-color wheel.
-- Generate Tailwind-style 50–950 scales, analogous and monochromatic palettes, complementary schemes, and shades.
-- Choose balanced, pastel, or vintage styles, then tune hue, lightness, and chroma in OKLCH.
+- Explore color harmonies with a draggable five-color wheel.
+- Generate 50–950 color scales and complementary, analogous, monochromatic, split-complementary, triadic, and shade palettes.
+- Tune hue, lightness, and chroma in OKLCH; choose balanced, pastel, or vintage styles.
 - Preview light and dark themes in dashboard, landing-page, and form layouts.
-- Extract up to five colors from PNG, JPEG, WebP, and GIF images, then apply a color as the seed or accent. Image processing stays local; images are not uploaded.
+- Extract up to five colors from PNG, JPEG, WebP, and GIF images. Image processing stays on your device.
 - Save up to 20 palettes locally and copy CSS, Tailwind configuration, or JSON.
-- Use the desktop eyedropper to pick a color from the screen.
+- Pick colors from anywhere on screen with the desktop eyedropper.
 
-## Privacy and data
+## Desktop support
 
-- TadaHue has no usage analytics, telemetry, or crash-reporting feature. It does not send usage logs or color data.
-- Image color extraction happens locally; images are not uploaded.
-- Saved palettes stay in local browser or desktop-app storage. TadaHue has no accounts or cloud sync.
+| Platform | Package                    | Screen eyedropper                                             |
+| -------- | -------------------------- | ------------------------------------------------------------- |
+| Linux    | AppImage                   | X11 capture or Wayland screenshot portal                      |
+| Windows  | NSIS installer or portable | Electron screen capture                                       |
+| macOS    | DMG                        | Electron screen capture; Screen Recording permission required |
+
+See [platform support](docs/PLATFORM_SUPPORT.md) for permission details and Linux display options.
+
+## Privacy
+
+TadaHue has no analytics, telemetry, crash reporting, accounts, or cloud sync. Image extraction and saved palettes stay on your device.
 
 ## Development
 
@@ -27,19 +37,23 @@ Requires Node.js and pnpm.
 ```bash
 pnpm install
 pnpm dev             # Start the browser development server
-pnpm electron:dev    # Launch the Electron desktop app
+pnpm electron:dev    # Launch the desktop app
 ```
+
+See the [developer guide](docs/DEVELOPMENT.md) for the source layout and implementation notes.
 
 ## Build and checks
 
 ```bash
 pnpm build
+pnpm electron:build
 pnpm lint
 pnpm test
 pnpm verify:theme
-pnpm electron:build
 ```
 
-Electron Builder is configured for Linux AppImage, Windows NSIS and portable packages, and macOS DMG. For Windows and macOS releases, use a matching machine or CI runner.
+Build Windows and macOS packages on a matching machine or CI runner.
 
-**Platform note:** The screen eyedropper currently uses Linux's `spectacle` command to capture the screen, so it is available only on Linux desktop environments with `spectacle` installed. Image color extraction runs locally in the renderer.
+## License
+
+TadaHue is licensed under the MIT License. Linux Wayland support uses `@homebridge/dbus-native`; see [third-party notices](THIRD_PARTY_NOTICES.md) for its dependency licenses.

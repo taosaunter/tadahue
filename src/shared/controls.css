@@ -1,0 +1,143 @@
+/* Shared buttons, selects, feedback tooltips, and reduced-motion behavior. */
+
+.compact-select {
+  max-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.icon-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-raised);
+  color: var(--ink-muted);
+  font-size: 18px;
+}
+
+.icon-button {
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.icon-button:hover {
+  background: var(--selected);
+  border-color: var(--primary);
+  color: var(--ink);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.quiet-button {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.quiet-button:hover {
+  border-color: var(--primary);
+}
+
+.quiet-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 30;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 230px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 11px/1.5 sans-serif;
+  white-space: normal;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-feedback="true"]::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.compact-select:focus {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+  border-color: var(--primary);
+}
+
+.color-input:focus {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+  border-color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-button {
+    transition: none;
+  }
+}

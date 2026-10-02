@@ -1,0 +1,188 @@
+/* Workspace geometry, toolbar spacing, tab bar, and shared panel scrolling. */
+
+.app-shell {
+  width: 356px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+.app-shell:has(.workspace-expanded) {
+  width: 1020px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 332px);
+  gap: 16px;
+  align-items: start;
+}
+
+.workspace-expanded {
+  grid-template-columns: 332px minmax(0, 1fr);
+}
+
+.controls-pane {
+  min-width: 0;
+  padding: 12px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.panel-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.toolbar-style {
+  min-width: 0;
+  flex: 1;
+  max-width: 96px;
+  padding: 6px 3px;
+}
+
+.output-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.output-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.tools-pane {
+  min-width: 0;
+}
+
+.tools-pane[hidden] {
+  display: none;
+}
+
+.workspace-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 4px;
+  margin-bottom: 12px;
+  border-radius: 9px;
+  background: var(--surface-raised);
+}
+
+.workspace-tabs button {
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.workspace-tabs button[aria-selected="true"] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.panel-toolbar [data-tooltip]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
+.toolbar-left > [data-tooltip]:first-child::after {
+  left: 0;
+  transform: none;
+}
+
+.toolbar-right > [data-tooltip]:last-child::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.output-actions > [data-tooltip]:first-child::after {
+  left: 0;
+  transform: none;
+}
+
+.output-toolbar > [data-tooltip]:last-child::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+@media (max-width: 700px) {
+  .workspace-expanded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* All six tabs share the left pane height; overflow scrolls inside the active panel. */
+
+@media (min-width: 701px) {
+  .workspace-expanded {
+    align-items: stretch;
+  }
+
+  .workspace-expanded .controls-pane {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .workspace-expanded .output-toolbar {
+    margin-top: auto;
+  }
+
+  .workspace-expanded .tools-pane {
+    display: flex;
+    flex-direction: column;
+    contain: size;
+    min-height: 0;
+    padding-block: 12px;
+  }
+
+  .workspace-expanded .workspace-tabs {
+    flex-shrink: 0;
+  }
+
+  .workspace-expanded .tools-pane > [role="tabpanel"]:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) var(--surface);
+  }
+
+  #panel-palettes {
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #panel-preview,
+  #panel-image {
+    overflow: visible;
+  }
+}

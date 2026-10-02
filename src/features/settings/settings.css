@@ -1,0 +1,93 @@
+/* Desktop settings popover and X11 compatibility controls. */
+
+.desktop-settings > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.desktop-settings > summary::-webkit-details-marker {
+  display: none;
+}
+
+.desktop-settings[open] > summary {
+  color: var(--ink);
+  border-color: var(--primary);
+}
+
+.desktop-settings[open] > summary::after {
+  display: none;
+}
+
+.display-settings-panel {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% - 4px);
+  width: min(100%, 300px);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #0002;
+  font-size: 12px;
+}
+
+.display-mode-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.display-mode-choice input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+
+.display-settings-panel p {
+  margin-top: 10px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.display-settings-panel .display-settings-error {
+  color: var(--danger);
+}
+
+.display-mode-apply {
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: var(--on-primary);
+  cursor: pointer;
+}
+
+.display-mode-apply:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.display-mode-apply:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.desktop-settings summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.display-mode-choice input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.display-mode-apply:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}

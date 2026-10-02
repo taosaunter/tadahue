@@ -1,0 +1,15 @@
+/* App-wide defaults, selection, caret, and keyboard focus. */
+body {
+  @apply bg-background text-ink font-sans antialiased;
+}
+button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+::selection {
+  background: var(--selected);
+  color: var(--ink);
+}
+input {
+  caret-color: var(--primary);
+}

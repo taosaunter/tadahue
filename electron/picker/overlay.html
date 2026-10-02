@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        cursor: crosshair;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #snapshot {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none;
+      }
+      #selection {
+        position: fixed;
+        width: 7px;
+        height: 7px;
+        border: 1px solid white;
+        outline: 1px solid black;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+      #magnifier {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 132px;
+        min-height: 168px;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #1c1c22;
+        border: 2px solid #3f3f46;
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        z-index: 10;
+      }
+      #gridWrap {
+        width: 108px;
+        height: 108px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 1px solid #3f3f46;
+      }
+      canvas {
+        display: block;
+      }
+      #hex {
+        margin-top: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #e9e6ef;
+      }
+      #hint {
+        margin-top: 2px;
+        font-size: 10px;
+        color: #a6a3ab;
+        width: 100%;
+        text-align: center;
+        line-height: 1.4;
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="snapshot" hidden alt="" />
+    <div id="selection" hidden></div>
+    <div id="magnifier">
+      <div id="gridWrap">
+        <canvas id="grid" width="108" height="108"></canvas>
+      </div>
+      <div id="hex">#------</div>
+      <div id="hint"></div>
+    </div>
+    <script>
+      const canvas = document.getElementById("grid");
+      const ctx = canvas.getContext("2d");
+      const hexEl = document.getElementById("hex");
+      const magEl = document.getElementById("magnifier");
+      const locale =
+        new URLSearchParams(location.search).get("locale") === "zh-TW"
+          ? "zh-TW"
+          : "en";
+      document.getElementById("hint").textContent =
+        locale === "zh-TW"
+          ? "左鍵取色 · 右鍵取消"
+          : "Left-click to pick · Right-click to cancel";
+      const N = 9;
+      const CELL = 12;
+      const OFFSET = 18;
+
+      function positionMagnifier(x, y) {
+        magEl.style.left =
+          Math.max(0, Math.min(x + OFFSET, innerWidth - magEl.offsetWidth)) +
+          "px";
+        magEl.style.top =
+          Math.max(0, Math.min(y + OFFSET, innerHeight - magEl.offsetHeight)) +
+          "px";
+      }
+      window.pickerOverlay.onPosition(({ x, y }) => positionMagnifier(x, y));
+      const snapshot = document.getElementById("snapshot");
+      const selection = document.getElementById("selection");
+      let imageSize;
+      let snapshotLoaded = false;
+      let readyReported = false;
+      let selected;
+      function imageRect() {
+        const scale = Math.min(
+          innerWidth / imageSize.width,
+          innerHeight / imageSize.height,
+        );
+        const width = imageSize.width * scale,
+          height = imageSize.height * scale;
+        return {
+          x: (innerWidth - width) / 2,
+          y: (innerHeight - height) / 2,
+          width,
+          height,
+        };
+      }
+      function localPoint(x, y) {
+        if (!imageSize) return { x, y };
+        const rect = imageRect();
+        if (
+          x < rect.x ||
+          y < rect.y ||
+          x >= rect.x + rect.width ||
+          y >= rect.y + rect.height
+        )
+          return null;
+        return {
+          x: Math.floor(((x - rect.x) * imageSize.width) / rect.width),
+          y: Math.floor(((y - rect.y) * imageSize.height) / rect.height),
+        };
+      }
+      function select(point) {
+        selected = point;
+        const rect = imageRect();
+        const x = rect.x + ((point.x + 0.5) * rect.width) / imageSize.width;
+        const y = rect.y + ((point.y + 0.5) * rect.height) / imageSize.height;
+        selection.style.left = x + "px";
+        selection.style.top = y + "px";
+        positionMagnifier(x, y);
+        window.pickerOverlay.move(point.x, point.y);
+      }
+      window.pickerOverlay.onImage((image) => {
+        imageSize = { width: image.width, height: image.height };
+        const previewReady = () => {
+          snapshotLoaded = true;
+          selection.hidden = false;
+          select({
+            x: Math.floor(image.width / 2),
+            y: Math.floor(image.height / 2),
+          });
+        };
+        if (image.presentation === "desktop") {
+          // Leave the desktop visible, including playing videos. Only the
+          // magnifier reads the captured frame; there is no frozen backdrop.
+          previewReady();
+        } else {
+          snapshot.onload = () => {
+            snapshot.hidden = false;
+            document.body.style.background = "#111115";
+            previewReady();
+          };
+          snapshot.onerror = () => window.pickerOverlay.imageError();
+          snapshot.src = image.dataUrl;
+        }
+        document.getElementById("hint").textContent =
+          locale === "zh-TW"
+            ? "左鍵 / Enter 取色\n方向鍵逐像素微調\n右鍵 / Esc 取消" +
+              (image.presentation === "desktop"
+                ? "\n取樣自啟動吸管時的畫面"
+                : "")
+            : "Click / Enter: pick\nArrows: 1 pixel\nRight-click / Esc: exit" +
+              (image.presentation === "desktop"
+                ? "\nSamples the opening frame"
+                : "");
+        document.getElementById("hint").style.fontFamily =
+          "system-ui, sans-serif";
+      });
+      window.addEventListener("resize", () => {
+        if (selected && imageSize) select(selected);
+      });
+      let lastSent = 0;
+      document.addEventListener("mousemove", (e) => {
+        positionMagnifier(e.clientX, e.clientY);
+        const point = localPoint(e.clientX, e.clientY);
+        if (point && imageSize) selected = point;
+        const now = Date.now();
+        if (now - lastSent < 30) return;
+        lastSent = now;
+        if (point && imageSize) select(point);
+        else if (point) window.pickerOverlay.move(point.x, point.y);
+      });
+      document.addEventListener("click", (e) => {
+        e.preventDefault();
+        const point = localPoint(e.clientX, e.clientY);
+        if (point) window.pickerOverlay.pick(point.x, point.y);
+      });
+      document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        window.pickerOverlay.cancel();
+      });
+      // Keep keyboard controls working when a global shortcut is unavailable.
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          window.pickerOverlay.cancel();
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          window.pickerOverlay.pickAtCursor(imageSize ? selected : undefined);
+        } else if (
+          imageSize &&
+          selected &&
+          ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
+        ) {
+          e.preventDefault();
+          select({
+            x: Math.max(
+              0,
+              Math.min(
+                imageSize.width - 1,
+                selected.x +
+                  (e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0),
+              ),
+            ),
+            y: Math.max(
+              0,
+              Math.min(
+                imageSize.height - 1,
+                selected.y +
+                  (e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0),
+              ),
+            ),
+          });
+        }
+      });
+      window.pickerOverlay.onColor(({ hex, grid, cx, cy }) => {
+        hexEl.textContent = hex;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(
+          canvas.width / 2,
+          canvas.height / 2,
+          canvas.width / 2,
+          0,
+          Math.PI * 2,
+        );
+        ctx.clip();
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            ctx.fillStyle = grid[r * N + c];
+            ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
+          }
+        }
+        ctx.strokeStyle = "rgba(255,255,255,0.95)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx * CELL, cy * CELL, CELL, CELL);
+        ctx.strokeStyle = "rgba(0,0,0,0.8)";
+        ctx.strokeRect(cx * CELL - 1, cy * CELL - 1, CELL + 2, CELL + 2);
+        ctx.restore();
+        if (snapshotLoaded && !readyReported) {
+          readyReported = true;
+          // Commit the preview (and backdrop, if needed) while hidden.
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => window.pickerOverlay.ready()),
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { generateThemePalette, allChecksPass } from "../src/palette.ts";
+import { generateThemePalette, allChecksPass } from "../src/color/palette.ts";
 
 const seed = (process.argv[2] ?? "#778873").replace(/^#/, "");
 if (!/^[0-9a-f]{6}$/i.test(seed)) {

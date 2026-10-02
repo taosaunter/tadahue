@@ -1,0 +1,14 @@
+/* Saved palette list scrolling. The desktop workspace owns its active-panel scroll. */
+.library-list {
+  max-height: 460px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--surface);
+}
+
+@media (min-width: 701px) {
+  .workspace-expanded .library-list {
+    max-height: none;
+    overflow: visible;
+  }
+}
