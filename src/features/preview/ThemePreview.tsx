@@ -32,11 +32,11 @@ function MiniApp({
   return (
     <div
       style={scopeVars(palette, theme) as CSSProperties}
-      className="preview-canvas border-line bg-surface rounded-xl border p-4 shadow-sm"
+      className={`preview-canvas border-line ${palette.background ? "bg-background" : "bg-surface"} rounded-xl border p-4 shadow-sm`}
     >
       <div className="border-line text-ink-muted mb-3 flex items-center justify-between border-b pb-2 text-[10px] font-semibold tracking-wider uppercase">
         <span>
-          {t(theme)} ·{" "}
+          {t(palette.background ? "backgroundMode" : theme)} ·{" "}
           {t(
             `preview${sample[0].toUpperCase()}${sample.slice(1)}` as
               "previewDashboard" | "previewLanding" | "previewForm",
@@ -51,9 +51,11 @@ function MiniApp({
 export default function ThemePreview({
   palette,
   theme,
+  onShowContrast,
 }: {
   palette: ThemePalette;
   theme: ThemeMode;
+  onShowContrast: () => void;
 }) {
   const { t } = useLocale();
   const [sample, setSample] = useState<Sample>("dashboard");
@@ -81,6 +83,18 @@ export default function ThemePreview({
           ))}
         </div>
       </div>
+      <button
+        className="quiet-button contrast-summary"
+        type="button"
+        onClick={onShowContrast}
+      >
+        {t("contrastSummary", {
+          passed: String(
+            palette.checks[theme].filter((check) => check.ok).length,
+          ),
+          total: String(palette.checks[theme].length),
+        })}
+      </button>
       <div className="preview-frame grid gap-3">
         <MiniApp palette={palette} theme={theme} sample={sample} />
       </div>

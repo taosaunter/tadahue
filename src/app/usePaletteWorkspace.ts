@@ -25,7 +25,10 @@ import { linkedAnchors, pairedColor, type HarmonyMode } from "../color/harmony";
 // Storage keys and snapshot versions are deliberately unchanged during UI refactors.
 export function usePaletteWorkspace() {
   const [restartDraft] = useState(readRestartPalette);
-  const [hex, setHex] = useState(restartDraft?.snapshot.seed ?? "#764646");
+  const [hex, setHex] = useState(restartDraft?.snapshot.background ?? restartDraft?.snapshot.seed ?? "#764646");
+  const [backgroundEnabled, setBackgroundEnabled] = useState(
+    !!restartDraft?.snapshot.background,
+  );
   const [saved, setSaved] = useState<SavedPaletteSnapshot[]>(loadLibrary);
   const [activeId, setActiveId] = useState<string | null>(
     restartDraft?.activeId ?? null,
@@ -65,10 +68,23 @@ export function usePaletteWorkspace() {
   );
 
   const palette = useMemo(
-    () => loadedPalette ?? generateThemePalette(hex, style, tuning, accent),
-    [hex, accent, style, tuning, loadedPalette],
+    () =>
+      loadedPalette ??
+      generateThemePalette(
+        hex,
+        style,
+        tuning,
+        accent,
+        backgroundEnabled ? hex : undefined,
+      ),
+    [hex, accent, style, tuning, loadedPalette, backgroundEnabled],
   );
 
+  function handleBackgroundEnabledChange(value: boolean) {
+    setBackgroundEnabled(value);
+    setLoadedPalette(null);
+    setActiveId(null);
+  }
   function handleAnchorChange(anchor: 0 | 1, value: string) {
     const [nextSeed, nextAccent] = linkedAnchors(
       hex,
@@ -77,7 +93,7 @@ export function usePaletteWorkspace() {
       value,
       harmony,
     );
-    setHex(anchor === 0 ? value : nextSeed);
+    setHex(anchor === 0 ? value : backgroundEnabled ? hex : nextSeed);
     setAccent(anchor === 1 ? value : nextAccent);
     setLoadedPalette(null);
     setActiveId(null);
@@ -122,7 +138,8 @@ export function usePaletteWorkspace() {
   function handleLoad(snapshot: SavedPaletteSnapshot) {
     const restored = restoreSnapshot(snapshot);
     if (!restored) return;
-    setHex(snapshot.seed);
+    setHex(snapshot.background ?? snapshot.seed);
+    setBackgroundEnabled(!!snapshot.background);
     setStyle(snapshot.style);
     setTuning({ ...snapshot.tuning });
     setLoadedPalette(restored);
@@ -163,6 +180,8 @@ export function usePaletteWorkspace() {
   return {
     editor: {
       seed: hex,
+      backgroundEnabled,
+      onBackgroundEnabledChange: handleBackgroundEnabledChange,
       accent,
       harmony,
       style,

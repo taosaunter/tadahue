@@ -13,19 +13,21 @@ export default function PaletteSection({
   labels,
 }: PaletteSectionProps) {
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-ink-muted mt-4 text-xs font-semibold tracking-widest uppercase">
+    <section className="palette-family">
+      <h2 className="text-ink-muted text-xs font-medium">
         {title}
       </h2>
-      <div
-        className="grid gap-2"
-        style={{
-          gridTemplateColumns: `repeat(${Math.min(colors.length, 5)}, minmax(0, 1fr))`,
-        }}
-      >
-        {colors.map((hex, i) => (
-          <ColorSwatch key={i} hex={hex} label={labels?.[i]} />
-        ))}
+      <div className="swatch-grid">
+        {colors.map((hex, i) =>
+          labels?.[i] ? (
+            <div className="scale-stop" key={i}>
+              <ColorSwatch hex={hex} label={labels[i]} />
+              <span aria-hidden="true">{labels[i]}</span>
+            </div>
+          ) : (
+            <ColorSwatch key={i} hex={hex} />
+          ),
+        )}
       </div>
     </section>
   );

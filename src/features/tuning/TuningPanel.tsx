@@ -76,6 +76,7 @@ export default function TuningPanel({
           </span>
           <input
             className="accent-primary mt-1 w-full"
+            aria-label={t(label)}
             type="range"
             min={min}
             max={max}

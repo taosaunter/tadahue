@@ -43,12 +43,12 @@ export default function PaletteLibrary({
                     onLoad(item);
                     setStatus("");
                   }}
-                  className={`flex min-w-0 flex-1 overflow-hidden rounded-md border-2 ${activeId === item.id ? "border-primary" : "border-transparent"}`}
+                  className={`saved-swatches min-w-0 flex-1 rounded-md border-2 ${activeId === item.id ? "border-primary" : "border-transparent"}`}
                 >
                   {colors.map((hex, index) => (
                     <span
                       key={index}
-                      className="h-7 flex-1"
+                      className="saved-swatch"
                       style={{ background: hex }}
                     />
                   ))}

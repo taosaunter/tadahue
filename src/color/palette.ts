@@ -1,6 +1,6 @@
 // Pure theme-token generation, gamut mapping, contrast checks, and CSS export.
 import { oklch, formatHex, parseHex, wcagContrast } from "culori";
-import { isHexColor } from "./colors.ts";
+import { generateScale, isHexColor, SCALE_STEPS } from "./colors.ts";
 
 export interface ContrastCheck {
   label: string;
@@ -52,6 +52,7 @@ export interface ThemeRole {
 
 export interface ThemePalette {
   seed: string;
+  background?: string;
   seedOklch: { l: number; c: number; h: number };
   light: ThemeRole[];
   dark: ThemeRole[];
@@ -316,11 +317,133 @@ function repairRoles(
     fill.hex = repairFillContrast(fill.hex, on.hex, REPAIR_MAX_DL);
 }
 
+// Find the nearest displayable lightness that satisfies every requested pair.
+// Searching rendered hex values also accounts for sRGB clipping and rounding.
+function fitContrast(hex: string, backgrounds: string[], min: number): string {
+  if (backgrounds.every((bg) => wcagContrast(hex, bg) >= min)) return hex;
+  const color = oklch(parseHex(hex))!;
+  let best = hex;
+  let distance = Infinity;
+  for (let i = 0; i <= 1000; i++) {
+    const l = i / 1000;
+    if (Math.abs(l - color.l) >= distance) continue;
+    const c = color.c * Math.min(1, l / 0.1, (1 - l) / 0.1);
+    const candidate = formatHex({ ...color, l, c });
+    if (backgrounds.every((bg) => wcagContrast(candidate, bg) >= min)) {
+      best = candidate;
+      distance = Math.abs(l - color.l);
+    }
+  }
+  return best;
+}
+
+function adaptToBackground(
+  roles: ThemeRole[],
+  background: string,
+): ThemeRole[] {
+  const colors = Object.fromEntries(roles.map(({ name, hex }) => [name, hex]));
+  colors.background = background.toUpperCase();
+  const canvas = oklch(parseHex(background))!;
+  const darkInk =
+    wcagContrast("#000000", background) >= wcagContrast("#ffffff", background);
+  const paperL = darkInk ? 1 : 0;
+  const surface = (amount: number) =>
+    formatHex({
+      ...canvas,
+      l: canvas.l + (paperL - canvas.l) * amount,
+      c: Math.min(canvas.c, 0.035) * (1 - amount),
+    });
+  colors.surface = surface(0.18);
+  colors["surface-raised"] = surface(0.32);
+  colors.selected = surface(0.24);
+  colors["primary-muted"] = surface(0.4);
+  colors["disabled-muted"] = surface(0.28);
+  const textSurfaces = [
+    background,
+    colors.surface,
+    colors["surface-raised"],
+    colors.selected,
+    colors["primary-muted"],
+  ];
+  const ink = darkInk ? "#000000" : "#ffffff";
+  colors.ink = fitContrast(
+    formatHex({
+      mode: "oklch",
+      l: darkInk ? 0.15 : 0.96,
+      c: 0.008,
+      h: canvas.h,
+    }),
+    textSurfaces,
+    AA_TEXT,
+  );
+  // Use the strongest neutral as a fallback for extreme saturated canvases.
+  if (!textSurfaces.every((bg) => wcagContrast(colors.ink, bg) >= AA_TEXT))
+    colors.ink = ink;
+  colors["on-surface"] = colors.ink;
+  colors["ink-muted"] = fitContrast(
+    formatHex({
+      mode: "oklch",
+      l: darkInk ? 0.42 : 0.72,
+      c: 0.008,
+      h: canvas.h,
+    }),
+    textSurfaces,
+    AA_TEXT,
+  );
+  if (
+    !textSurfaces.every(
+      (bg) => wcagContrast(colors["ink-muted"], bg) >= AA_TEXT,
+    )
+  )
+    colors["ink-muted"] = ink;
+  colors.focus = fitContrast(
+    colors.focus,
+    [background, colors.surface, colors["surface-raised"]],
+    3,
+  );
+  colors.line = fitContrast(
+    surface(0.5),
+    [background, colors.surface, colors["surface-raised"]],
+    1.5,
+  );
+  colors.disabled = fitContrast(colors.disabled, [colors["disabled-muted"]], 3);
+  for (const name of ["primary", "accent", ...Object.keys(SEMANTIC)]) {
+    colors[name] = fitContrast(
+      colors[name],
+      [
+        background,
+        colors.surface,
+        colors["surface-raised"],
+        colors["primary-muted"],
+      ],
+      AA_TEXT,
+    );
+    const blackOnFill =
+      wcagContrast("#000000", colors[name]) >=
+      wcagContrast("#ffffff", colors[name]);
+    colors[`on-${name}`] = blackOnFill ? "#000000" : "#ffffff";
+    if (name in SEMANTIC) {
+      const fill = oklch(parseHex(colors[name]))!;
+      colors[`${name}-muted`] = fitContrast(
+        formatHex({
+          ...fill,
+          l: blackOnFill ? 0.12 : 0.97,
+          c: 0.025,
+        }),
+        [colors[name]],
+        AA_TEXT,
+      );
+    }
+  }
+  return roles.map((role) => ({ ...role, hex: colors[role.name] }));
+}
+
 export function generateThemePalette(
   seedHex: string,
   style: PaletteStyle = "balanced",
   tuning: PaletteTuning = DEFAULT_TUNING,
   accentHex?: string,
+  backgroundHex?: string,
 ): ThemePalette | null {
   if (
     !isHexColor(seedHex) ||
@@ -352,6 +475,23 @@ export function generateThemePalette(
   repairRoles(light, "on-accent", "accent");
   repairRoles(dark, "on-accent", "accent");
 
+  if (backgroundHex !== undefined) {
+    if (!isHexColor(backgroundHex)) return null;
+    // A fixed canvas has one palette, independent of the application's theme.
+    const roles = adaptToBackground(
+      wcagContrast("#000000", backgroundHex) >=
+        wcagContrast("#ffffff", backgroundHex)
+        ? light
+        : dark,
+      backgroundHex,
+    );
+    return assembleThemePalette(
+      seedHex,
+      roles,
+      roles.map((role) => ({ ...role })),
+      backgroundHex,
+    );
+  }
   return assembleThemePalette(seedHex, light, dark);
 }
 
@@ -359,14 +499,40 @@ export function assembleThemePalette(
   seedHex: string,
   light: ThemeRole[],
   dark: ThemeRole[],
+  backgroundHex?: string,
 ): ThemePalette | null {
-  if (!isHexColor(seedHex)) return null;
+  if (
+    !isHexColor(seedHex) ||
+    (backgroundHex !== undefined && !isHexColor(backgroundHex))
+  )
+    return null;
   const base = oklch(parseHex(seedHex));
   if (!base) return null;
 
   const runChecks = (roles: ThemeRole[]) => {
     const hexes = Object.fromEntries(roles.map((r) => [r.name, r.hex]));
-    return CONTRAST_CHECKS.map(([label, fg, bg, min]) => {
+    const checks = backgroundHex
+      ? [
+          ...CONTRAST_CHECKS,
+          ...["surface", "surface-raised", "primary-muted"].flatMap((bg) =>
+            ["ink", "ink-muted", "primary", "accent"].map(
+              (fg): [string, string, string, number] => [
+                `${fg} / ${bg}`,
+                fg,
+                bg,
+                AA_TEXT,
+              ],
+            ),
+          ),
+          ["Focus / raised surface", "focus", "surface-raised", 3] as [
+            string,
+            string,
+            string,
+            number,
+          ],
+        ]
+      : CONTRAST_CHECKS;
+    return checks.map(([label, fg, bg, min]) => {
       const ratio = wcagContrast(hexes[fg], hexes[bg]);
       return { label, fg, bg, min, ratio, ok: ratio >= min };
     });
@@ -375,7 +541,13 @@ export function assembleThemePalette(
   const names = light.map((r) => r.name);
   const lightVars = Object.fromEntries(light.map((r) => [r.name, r.hex]));
   const darkVars = Object.fromEntries(dark.map((r) => [r.name, r.hex]));
-  const atTheme = names.map((n) => `  --color-${n}: var(--${n});`).join("\n");
+  const scale = generateScale(seedHex);
+  const atTheme = [
+    ...names.map((n) => `  --color-${n}: var(--${n});`),
+    ...SCALE_STEPS.map(
+      (step, index) => `  --color-seed-${step}: ${scale[index]};`,
+    ),
+  ].join("\n");
   const pairVars = names
     .map((n) => `  --${n}: light-dark(${lightVars[n]}, ${darkVars[n]});`)
     .join("\n");
@@ -384,11 +556,12 @@ export function assembleThemePalette(
 
   return {
     seed: seedHex.toUpperCase(),
+    ...(backgroundHex ? { background: backgroundHex.toUpperCase() } : {}),
     seedOklch: { l: base.l, c: base.c, h: base.h ?? 0 },
     light,
     dark,
     checks: { light: runChecks(light), dark: runChecks(dark) },
-    css: `@theme {\n${atTheme}\n}\n\n:root {\n  color-scheme: light dark; \n${pairVars}\n}\n\n\n:root.light {\n  color-scheme: light;\n${decls(lightVars)}\n}\n\n:root.dark {\n  color-scheme: dark;\n${decls(darkVars)}\n}`,
+    css: `@theme inline {\n${atTheme}\n}\n\n:root {\n  color-scheme: light dark; \n${pairVars}\n}\n\n\n:root.light {\n  color-scheme: light;\n${decls(lightVars)}\n}\n\n:root.dark {\n  color-scheme: dark;\n${decls(darkVars)}\n}`,
   };
 }
 

@@ -50,13 +50,14 @@
 
 .image-colors {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .image-color {
-  flex: 1;
-  min-width: 0;
-  height: 36px;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   position: relative;
 }
@@ -71,11 +72,11 @@
   outline-offset: 3px;
 }
 
-@media (min-width: 701px) {
+@media (min-width: 901px) {
   #panel-image .image-palette {
     flex: 1;
     min-width: 0;
-    min-height: 0;
+    min-height: 300px;
     padding-bottom: 0;
   }
 

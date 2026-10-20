@@ -20,6 +20,7 @@ export const LIBRARY_LIMIT = 20;
 
 export interface SavedPaletteSnapshot {
   wheel?: WheelSettings;
+  background?: string;
   version: 1;
   id: string;
   name: string;
@@ -52,6 +53,7 @@ export function createSnapshot(
     name: name.trim() || palette.seed,
     note: note.trim(),
     seed: palette.seed,
+    ...(palette.background ? { background: palette.background } : {}),
     style,
     tuning: { ...tuning },
     light: values(palette, "light"),
@@ -87,6 +89,11 @@ export function isSavedPalette(value: unknown): value is SavedPaletteSnapshot {
     item.updatedAt > 8.64e15
   )
     return false;
+  if (
+    item.background !== undefined &&
+    (typeof item.background !== "string" || !isHexColor(item.background))
+  )
+    return false;
   if (item.wheel !== undefined && !isWheelSettings(item.wheel)) return false;
   const expected = generateThemePalette(item.seed, item.style, item.tuning);
   if (!expected) return false;
@@ -97,6 +104,8 @@ export function isSavedPalette(value: unknown): value is SavedPaletteSnapshot {
     const names = expected[mode].map(({ name }) => name);
     return (
       Object.keys(stored).length === names.length &&
+      (!item.background ||
+        stored.background?.toUpperCase() === item.background.toUpperCase()) &&
       names.every(
         (name) => typeof stored[name] === "string" && isHexColor(stored[name]),
       )
@@ -119,7 +128,12 @@ export function restoreSnapshot(
       ...role,
       hex: snapshot[mode][role.name],
     }));
-  return assembleThemePalette(snapshot.seed, roles("light"), roles("dark"));
+  return assembleThemePalette(
+    snapshot.seed,
+    roles("light"),
+    roles("dark"),
+    snapshot.background,
+  );
 }
 
 export function serializeLibrary(palettes: SavedPaletteSnapshot[]): string {

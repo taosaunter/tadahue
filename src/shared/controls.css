@@ -71,6 +71,7 @@
 }
 
 [data-tooltip]::after {
+  display: none;
   content: attr(data-tooltip);
   position: absolute;
   z-index: 30;
@@ -93,16 +94,19 @@
 }
 
 [data-tooltip]:hover::after {
+  display: block;
   opacity: 1;
   visibility: visible;
 }
 
 [data-tooltip]:focus-visible::after {
+  display: block;
   opacity: 1;
   visibility: visible;
 }
 
 [data-feedback="true"]::after {
+  display: block;
   opacity: 1;
   visibility: visible;
 }

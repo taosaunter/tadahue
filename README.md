@@ -10,12 +10,13 @@ A desktop color toolkit for creating palettes, exploring color harmonies, and pr
 
 ## Features
 
-- Explore color harmonies with a draggable five-color wheel.
-- Generate 50–950 color scales and complementary, analogous, monochromatic, split-complementary, triadic, and shade palettes.
+- Explore complementary, split-complementary, and triadic harmonies on an interactive five-handle color wheel; copy the five labeled HEX colors.
+- Generate complete 11-step 50–950 color scales and complementary, analogous, monochromatic, split-complementary, triadic, and shade palettes.
 - Tune hue, lightness, and chroma in OKLCH; choose balanced, pastel, or vintage styles.
 - Preview light and dark themes in dashboard, landing-page, and form layouts.
+- Switch the shared base-color input between theme generation and fixed-background website colors, with separate contrast checks.
 - Extract up to five colors from PNG, JPEG, WebP, and GIF images. Image processing stays on your device.
-- Save up to 20 palettes locally and copy CSS, Tailwind configuration, or JSON.
+- Save up to 20 palettes locally and copy Tailwind v4-ready CSS, a Tailwind v3 configuration, or JSON.
 - Pick colors from anywhere on screen with the desktop eyedropper.
 
 ## Desktop support
@@ -49,7 +50,7 @@ TadaHue has no analytics, telemetry, crash reporting, accounts, or cloud sync. I
 
 ## Development
 
-Requires Node.js and pnpm.
+Requires Node.js and pnpm. See the [developer guide](notes/DEVELOPMENT.md) for component locations, palette state, and layout behavior.
 
 ```bash
 pnpm install

@@ -1,6 +1,6 @@
 // Serialize generated palettes for JSON and Tailwind without UI or storage side effects.
 import { harmonyColors, type WheelSettings } from "./harmony.ts";
-import { generateScale } from "./colors.ts";
+import { generateScale, SCALE_STEPS } from "./colors.ts";
 import {
   DEFAULT_TUNING,
   type PaletteStyle,
@@ -26,6 +26,7 @@ export function designTokens(
   const scale = generateScale(palette.seed);
   return {
     seed: palette.seed,
+    ...(palette.background ? { background: palette.background } : {}),
     style,
     tuning,
     ...(wheel
@@ -36,18 +37,7 @@ export function designTokens(
       : {}),
     generatedPalette: {
       scale: Object.fromEntries(
-        [
-          "50",
-          "100",
-          "200",
-          "300",
-          "400",
-          "500",
-          "600",
-          "700",
-          "800",
-          "950",
-        ].map((step, index) => [step, scale[index]]),
+        SCALE_STEPS.map((step, index) => [step, scale[index]]),
       ),
     },
     semanticTokens: {

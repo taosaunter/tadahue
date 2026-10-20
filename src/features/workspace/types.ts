@@ -13,6 +13,8 @@ export interface PaletteWorkspaceProps {
   settings: ReactNode;
   onSave: () => boolean;
   seed: string;
+  backgroundEnabled: boolean;
+  onBackgroundEnabledChange: (enabled: boolean) => void;
   accent: string;
   harmony: HarmonyMode;
   onAnchorChange: (anchor: 0 | 1, hex: string) => void;

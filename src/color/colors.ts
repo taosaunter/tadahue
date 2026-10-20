@@ -6,6 +6,19 @@ import { oklch, formatHex, parseHex } from "culori";
 import { harmonyColors, pairedColor } from "./harmony.ts";
 
 type HexColor = string; // "#RRGGBB"
+export const SCALE_STEPS = [
+  "50",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+] as const;
 
 export function isHexColor(hex: string): boolean {
   return /^#[0-9a-f]{6}$/i.test(hex);
@@ -13,8 +26,8 @@ export function isHexColor(hex: string): boolean {
 
 /**
  * Tailwind-style 50-950 color scale.
- * Fixes H and C to input's values, partitions L evenly.
- * 50 (lightest) → 950 (darkest), 10 steps.
+ * Fixes H and C to input's values. Retains the original lightness stops and
+ * inserts 900 between 800 and 950 for a complete 11-step scale.
  */
 export function generateScale(hex: HexColor): HexColor[] {
   const base = oklch(parseHex(hex));
@@ -24,9 +37,9 @@ export function generateScale(hex: HexColor): HexColor[] {
   const lMax = 0.95;
   const scale: HexColor[] = [];
 
-  for (let i = 0; i < 10; i++) {
-    const t = i / 9;
-    base.l = lMax - t * (lMax - lMin);
+  for (let i = 0; i < SCALE_STEPS.length; i++) {
+    // Preserve the existing stops while filling the former 800 → 950 gap.
+    base.l = i === 9 ? 0.1 : lMax - Math.min(i, 9) * ((lMax - lMin) / 9);
     scale.push(formatHex(base));
   }
 

@@ -107,6 +107,36 @@ test("legacy seed history migrates and malformed imports cannot replace the libr
   );
 });
 
+test("fixed background snapshots restore their mode, exact colors, and exports", () => {
+  const palette = generateThemePalette(
+    "#2563eb",
+    "pastel",
+    DEFAULT_TUNING,
+    "#ff7733",
+    "#777777",
+  )!;
+  const snapshot = createSnapshot(
+    "fixed",
+    "Gray background",
+    "",
+    "pastel",
+    DEFAULT_TUNING,
+    palette,
+  );
+  const [parsed] = parseLibrary(serializeLibrary([snapshot]));
+  assert.equal(parsed.background, "#777777");
+  const restored = restoreSnapshot(parsed)!;
+  assert.equal(restored.background, palette.background);
+  assert.deepEqual(restored.checks, palette.checks);
+  assert.equal(restored.css, palette.css);
+  assert.equal(
+    designTokensJson(restored, "pastel"),
+    designTokensJson(palette, "pastel"),
+  );
+  assert.equal(isSavedPalette({ ...snapshot, background: "invalid" }), false);
+  assert.equal(isSavedPalette({ ...snapshot, background: 123 }), false);
+});
+
 test("exported CSS, token JSON, Tailwind config, and library JSON remain usable as files", async () => {
   const palette = generateThemePalette("#764646");
   assert.ok(palette);

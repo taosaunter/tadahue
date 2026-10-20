@@ -1,41 +1,24 @@
 import { useRef } from "react";
 import { useLocale } from "../../app/i18n";
 
-// One tab registry drives order, labels, keyboard navigation, and panel IDs.
-const TABS = [
-  "preview",
-  "tuning",
-  "tokens",
-  "palettes",
-  "image",
-  "library",
-] as const;
-export type WorkspaceTab = (typeof TABS)[number];
-const TAB_LABELS = {
-  tuning: "tuningTab",
-  preview: "previewTab",
-  tokens: "colorSwatches",
-  palettes: "morePalettes",
-  library: "libraryTab",
-  image: "imageTab",
-} as const;
+import { TAB_LABELS, type WorkspaceTab } from "./tabs";
 
-export default function WorkspaceTabs({
+export default function WorkspaceTabs<T extends WorkspaceTab>({
   tab,
   onChange,
+  tabs,
+  label,
 }: {
-  tab: WorkspaceTab;
-  onChange: (tab: WorkspaceTab) => void;
+  tab: T;
+  onChange: (tab: T) => void;
+  tabs: readonly T[];
+  label: string;
 }) {
   const { t } = useLocale();
   const tabButtons = useRef<Array<HTMLButtonElement | null>>([]);
   return (
-    <div
-      role="tablist"
-      aria-label={t("workspaceTools")}
-      className="workspace-tabs"
-    >
-      {TABS.map((value, index) => (
+    <div role="tablist" aria-label={label} className="workspace-tabs">
+      {tabs.map((value, index) => (
         <button
           key={value}
           ref={(node) => {
@@ -50,14 +33,14 @@ export default function WorkspaceTabs({
           onClick={() => onChange(value)}
           onKeyDown={(event) => {
             let next: number;
-            if (event.key === "ArrowRight") next = (index + 1) % TABS.length;
+            if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
             else if (event.key === "ArrowLeft")
-              next = (index + TABS.length - 1) % TABS.length;
+              next = (index + tabs.length - 1) % tabs.length;
             else if (event.key === "Home") next = 0;
-            else if (event.key === "End") next = TABS.length - 1;
+            else if (event.key === "End") next = tabs.length - 1;
             else return;
             event.preventDefault();
-            onChange(TABS[next]);
+            onChange(tabs[next]);
             tabButtons.current[next]?.focus();
           }}
         >

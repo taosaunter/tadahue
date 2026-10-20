@@ -6,9 +6,23 @@
   scrollbar-color: var(--line) var(--surface);
 }
 
-@media (min-width: 701px) {
+@media (min-width: 901px) {
   .workspace-expanded .library-list {
     max-height: none;
     overflow: visible;
   }
+}
+
+.saved-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+}
+.saved-swatch {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
 }

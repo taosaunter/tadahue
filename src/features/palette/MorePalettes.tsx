@@ -1,20 +1,7 @@
 import { useMemo } from "react";
-import { generateAll } from "../../color/colors";
+import { generateAll, SCALE_STEPS } from "../../color/colors";
 import { useLocale } from "../../app/i18n";
 import PaletteSection from "./PaletteSection";
-
-const SCALE_LABELS = [
-  "50",
-  "100",
-  "200",
-  "300",
-  "400",
-  "500",
-  "600",
-  "700",
-  "800",
-  "950",
-];
 
 // More palettes tab: derived scales and families, independent of theme-token tuning.
 export default function MorePalettes({ seed }: { seed: string }) {
@@ -26,7 +13,7 @@ export default function MorePalettes({ seed }: { seed: string }) {
       <PaletteSection
         title={t("scale")}
         colors={schemes.scale}
-        labels={SCALE_LABELS}
+        labels={[...SCALE_STEPS]}
       />
       <PaletteSection title={t("analogous")} colors={schemes.analogous} />
       <PaletteSection

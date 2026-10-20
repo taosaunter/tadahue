@@ -27,13 +27,20 @@ test("restart drafts preserve unsaved palette tokens, tuning, harmony, and the a
     setItem: (key: string, value: string) => values.set(key, value),
   } as unknown as Storage);
   const tuning = { ...DEFAULT_TUNING, hueShift: 12 };
-  const palette = generateThemePalette("#123456", "pastel", tuning, "#abcdef")!;
+  const palette = generateThemePalette(
+    "#123456",
+    "pastel",
+    tuning,
+    "#abcdef",
+    "#F5F1ED",
+  )!;
   const snapshot = {
     ...createSnapshot("restart", "Draft", "", "pastel", tuning, palette),
     wheel: { mode: "triad" as const, accent: "#abcdef" },
   };
   assert.equal(rememberRestartPalette(snapshot, "saved-123"), true);
   assert.deepEqual(readRestartPalette(), { snapshot, activeId: "saved-123" });
+  assert.equal(readRestartPalette()?.snapshot.background, "#F5F1ED");
 });
 
 test("damaged restart data is ignored", (t) => {

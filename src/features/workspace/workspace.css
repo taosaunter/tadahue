@@ -8,7 +8,7 @@
 }
 
 .app-shell:has(.workspace-expanded) {
-  width: 1020px;
+  width: 1120px;
 }
 
 .workspace {
@@ -19,7 +19,7 @@
 }
 
 .workspace-expanded {
-  grid-template-columns: 332px minmax(0, 1fr);
+  grid-template-columns: 400px minmax(0, 1fr);
 }
 
 .controls-pane {
@@ -73,11 +73,11 @@
   gap: 4px;
 }
 
-.tools-pane {
+.results-pane {
   min-width: 0;
 }
 
-.tools-pane[hidden] {
+.results-pane[hidden] {
   display: none;
 }
 
@@ -130,59 +130,158 @@
   transform: none;
 }
 
-@media (max-width: 700px) {
+/* Keep the fixed-background color labels inside the compact window. */
+.controls-pane .swatch-button:first-child::after {
+  left: 0;
+  transform: none;
+}
+
+.controls-pane .swatch-button:last-child::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+@media (max-width: 900px) {
   .workspace-expanded {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* All six tabs share the left pane height; overflow scrolls inside the active panel. */
-
-@media (min-width: 701px) {
+/* Both sides own their scroll area, so edits never move the preview. */
+.palette-settings {
+  padding-block: 4px 16px;
+}
+.palette-settings h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.palette-inputs {
+  display: grid;
+  gap: 12px;
+}
+.settings-options,
+.settings-colors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+}
+.settings-field .compact-select {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 8px;
+}
+.settings-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.workspace-expanded .controls-pane {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 24px);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--surface);
+}
+.workspace-expanded .panel-toolbar,
+.workspace-expanded .palette-settings,
+.workspace-expanded .output-toolbar {
+  flex-shrink: 0;
+}
+.workspace-expanded .panel-toolbar {
+  margin-bottom: 4px;
+}
+.workspace-expanded .palette-settings {
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.workspace-expanded .output-toolbar {
+  margin-top: 12px;
+}
+.palette-tools,
+.results-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.palette-tools {
+  flex: 1;
+  min-height: 200px;
+  overflow: hidden;
+}
+.palette-tools .workspace-tabs {
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.palette-tools .workspace-tabs button {
+  padding: 7px 6px;
+  font-size: 11px;
+}
+.workspace-tabs {
+  flex-shrink: 0;
+}
+.palette-tools > [role="tabpanel"]:not([hidden]),
+.results-pane > [role="tabpanel"]:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--surface);
+}
+@media (min-width: 901px) {
   .workspace-expanded {
     align-items: stretch;
-  }
-
-  .workspace-expanded .controls-pane {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .workspace-expanded .output-toolbar {
-    margin-top: auto;
-  }
-
-  .workspace-expanded .tools-pane {
-    display: flex;
-    flex-direction: column;
-    contain: size;
+    height: calc(100dvh - 24px);
     min-height: 0;
+  }
+  .results-pane {
     padding-block: 12px;
   }
+}
+@media (max-width: 900px) {
+  .results-pane {
+    height: max(480px, calc(100dvh - 24px));
+    padding: 12px;
+  }
+}
 
-  .workspace-expanded .workspace-tabs {
-    flex-shrink: 0;
+/* Keep the seed-color controls usable in short windows and small work areas. */
+@media (max-height: 619px) {
+  .controls-pane .panel-toolbar {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
   }
 
-  .workspace-expanded .tools-pane > [role="tabpanel"]:not([hidden]) {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) var(--surface);
+  .controls-pane .wheel-wrap {
+    width: clamp(120px, calc(100dvh - 410px), 208px);
   }
+}
 
-  #panel-palettes {
-    min-width: 0;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  #panel-preview,
-  #panel-image {
-    overflow: visible;
-  }
+.swatch-grid .swatch-button:nth-child(7n + 1)::after,
+.swatch-grid .swatch-button:nth-child(7n + 2)::after {
+  left: 0;
+  right: auto;
+  transform: none;
+}
+.swatch-grid .swatch-button:nth-child(7n + 6)::after,
+.swatch-grid .swatch-button:nth-child(7n)::after {
+  left: auto;
+  right: 0;
+  transform: none;
 }

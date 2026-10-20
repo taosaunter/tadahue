@@ -21,11 +21,7 @@ export default function RoleGrid({
   return (
     <div className="rounded-lg p-2">
       <h2 className="text-ink-muted mb-2 text-xs">{title}</h2>
-      <div
-        className={
-          roles.length === 28 ? "token-grid" : "grid grid-cols-5 gap-2"
-        }
-      >
+      <div className="swatch-grid">
         {roles.map((role) => {
           const key = `${title}:${role.name}`;
           const label = `${role.name} · ${role.hex} · ${error === key ? t("copyFailed") : copied === key ? t("copied") : t("copyHex", { hex: role.hex })}`;

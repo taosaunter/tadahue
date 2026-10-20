@@ -18,6 +18,7 @@ const browserGlobals = {
 };
 
 const nodeGlobals = {
+  AbortController: "readonly",
   Buffer: "readonly",
   __dirname: "readonly",
   clearTimeout: "readonly",
@@ -29,6 +30,7 @@ const nodeGlobals = {
   setImmediate: "readonly",
   setTimeout: "readonly",
   URL: "readonly",
+  WebSocket: "readonly",
 };
 
 export default tseslint.config(

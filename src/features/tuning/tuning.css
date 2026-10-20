@@ -11,6 +11,11 @@
   min-height: 32px;
 }
 
+.palette-tools .tuning-pane {
+  gap: 4px;
+  padding: 8px;
+}
+
 .tuning-pane .swatch-button:first-child::after {
   left: 0;
   transform: none;
@@ -22,12 +27,12 @@
   transform: none;
 }
 
-@media (min-width: 701px) {
+@media (min-width: 901px) {
   #panel-tuning .tuning-pane {
     flex: 1;
     min-width: 0;
     min-height: 0;
-    padding-bottom: 0;
+    padding-bottom: 8px;
   }
 
   .tuning-reset {

@@ -18,7 +18,7 @@ interface Props {
 const radius = 92;
 export default function ColorWheel({ seed, accent, mode, onChange }: Props) {
   const { t } = useLocale();
-  const { copied, copy } = useCopy();
+  const { copied, copy, error } = useCopy();
   const dragging = useRef<number | null>(null);
   const colors = harmonyColors(seed, accent, mode);
   const points = colors.map((hex) => {
@@ -48,7 +48,7 @@ export default function ColorWheel({ seed, accent, mode, onChange }: Props) {
     onChange(next.anchor, next.hex);
   }
   return (
-    <div>
+    <section className="harmony-editor" aria-label={t("wheelTitle")}>
       <div className="wheel-wrap">
         <svg
           viewBox="0 0 200 200"
@@ -167,25 +167,38 @@ export default function ColorWheel({ seed, accent, mode, onChange }: Props) {
       <p className="text-ink-muted mt-1 text-center text-[11px]">
         {t("wheelHint")}
       </p>
-      <div className="mt-3 grid grid-cols-5 gap-1">
+      <div className="harmony-strip" aria-label={t("harmonyColors")}>
         {colors.map((hex, index) => (
           <button
             key={index}
             type="button"
-            aria-label={t("copyHex", { hex })}
-            data-tooltip={
-              copied === String(index) ? t("copied") : hex.toUpperCase()
-            }
+            aria-label={`${t(index === 1 ? "colorOne" : index === 2 ? "colorTwo" : "generatedColor")} ${index + 1} · ${t("copyHex", { hex })}`}
+            data-feedback={copied === String(index) || undefined}
             onClick={() => copy(hex, String(index))}
-            className="focus-visible:outline-focus min-w-0 rounded focus-visible:outline-2"
+            className="harmony-swatch"
           >
             <span
-              className="border-line block h-8 rounded border"
+              className="harmony-swatch-color"
               style={{ background: hex }}
             />
+            <span className="harmony-swatch-role">
+              {copied === String(index)
+                ? t("copied")
+                : t(
+                    index === 1
+                      ? "wheelBaseShort"
+                      : index === 2
+                        ? "wheelAccentShort"
+                        : "wheelDerivedShort",
+                  )}
+            </span>
+            <span className="harmony-swatch-hex">{hex.toUpperCase()}</span>
           </button>
         ))}
       </div>
-    </div>
+      <p className="sr-only" role="status">
+        {error ? t("copyFailed") : copied ? t("copied") : ""}
+      </p>
+    </section>
   );
 }

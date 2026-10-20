@@ -6,7 +6,8 @@ tmp/
 graphify-out/
 .prettierrc
 notes/
-!docs/DEVELOPMENT.md
 .impeccable/
 .agents/
 .codex/
+AGENTS.md
+CLAUDE.md

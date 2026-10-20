@@ -17,6 +17,10 @@ import { fileURLToPath } from "node:url";
 import { createColorPicker } from "./picker/color-picker.mjs";
 import { createDisplayMode } from "./platform/display-mode.mjs";
 import {
+  WORKSPACE_WINDOW,
+  workspaceWindowGeometry,
+} from "./workspace-window.mjs";
+import {
   ensurePortalIdentity,
   portalAppId,
 } from "./platform/portal-identity.mjs";
@@ -58,10 +62,7 @@ const picker = createColorPicker({
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 356,
-    minWidth: 356,
-    minHeight: 520,
-    height: 560,
+    ...WORKSPACE_WINDOW,
     useContentSize: true,
     icon: app.isPackaged
       ? join(process.resourcesPath, "tadahue.png")
@@ -75,9 +76,9 @@ function createWindow() {
   });
   displayMode.bindWindow(win);
 
-  // Only this window's renderer can request the two supported workspace widths.
+  // Only this window's renderer can initialize the unified workspace bounds.
   const resizeWorkspace = (event, expanded) => {
-    if (event.sender !== win.webContents || typeof expanded !== "boolean")
+    if (event.sender !== win.webContents || expanded !== true)
       return;
     if (win.isFullScreen()) {
       win.once("leave-full-screen", () => resizeWorkspace(event, expanded));
@@ -87,15 +88,10 @@ function createWindow() {
     if (win.isMaximized()) win.unmaximize();
     const bounds = win.getBounds();
     const content = win.getContentBounds();
-    const frameWidth = bounds.width - content.width;
     const area = screen.getDisplayMatching(bounds).workArea;
-    const width = Math.min((expanded ? 1020 : 356) + frameWidth, area.width);
-    win.setMinimumSize(356 + frameWidth, 520 + bounds.height - content.height);
-    win.setBounds({
-      ...bounds,
-      width,
-      x: Math.max(area.x, Math.min(bounds.x, area.x + area.width - width)),
-    });
+    const geometry = workspaceWindowGeometry(bounds, content, area);
+    win.setMinimumSize(...geometry.minimum);
+    win.setBounds(geometry.bounds);
   };
   ipcMain.on("workspace:expanded", resizeWorkspace);
   win.on("closed", () =>
