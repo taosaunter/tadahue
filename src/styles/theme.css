@@ -2,7 +2,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
+@theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
@@ -31,100 +31,94 @@
   --color-info: var(--info);
   --color-on-info: var(--on-info);
   --color-info-muted: var(--info-muted);
+
+  /* shadcn/ui aliases also work inside palette previews. */
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--on-surface);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--on-surface);
+  --color-primary-foreground: var(--on-primary);
+  --color-secondary: var(--selected);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--surface-raised);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent-foreground: var(--on-accent);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--on-danger);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--focus);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
+@theme {
+  --font-sans: "Noto Sans TC Variable", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
 :root {
-  color-scheme: light dark;
-  --background: light-dark(#fff7f7, #120b0b);
-  --surface: light-dark(#fdf2f2, #191212);
-  --surface-raised: light-dark(#f7ebeb, #221b1b);
-  --ink: light-dark(#1b1414, #f0e5e4);
-  --ink-muted: light-dark(#534b4a, #aca2a1);
-  --line: light-dark(#dfd4d4, #393130);
-  --primary: light-dark(#764646, #dfa7a6);
-  --on-primary: light-dark(#f8f8f8, #161616);
-  --primary-muted: light-dark(#fedbda, #402625);
-  --accent: light-dark(#734a33, #dbac92);
-  --success: light-dark(#0b703f, #4add8c);
-  --on-success: light-dark(#f8f8f8, #161616);
-  --success-muted: light-dark(#cbefd6, #173523);
-  --warning: light-dark(#b94f16, #ec9453);
-  --on-warning: light-dark(#f8f8f8, #161616);
-  --warning-muted: light-dark(#fff9d3, #362d0d);
-  --danger: light-dark(#ac1922, #f8a49d);
-  --on-danger: light-dark(#f8f8f8, #161616);
-  --danger-muted: light-dark(#ffd8d4, #442321);
-  --on-surface: light-dark(#1b1414, #f0e5e4);
-  --on-accent: light-dark(#f8f8f8, #161616);
-  --focus: light-dark(#494040, #ccc1c1);
-  --selected: light-dark(#e6dbdb, #433b3a);
-  --disabled: light-dark(#706666, #817877);
-  --disabled-muted: light-dark(#e9dede, #413838);
-  --info: light-dark(#005fa8, #80c3ff);
-  --on-info: light-dark(#f8f8f8, #161616);
-  --info-muted: light-dark(#cce8ff, #192f46);
-}
-
-:root.light {
+  --radius: 8px;
   color-scheme: light;
-  --background: #fff7f7;
-  --surface: #fdf2f2;
-  --surface-raised: #f7ebeb;
-  --ink: #1b1414;
-  --ink-muted: #534b4a;
-  --line: #dfd4d4;
-  --primary: #764646;
-  --on-primary: #f8f8f8;
-  --primary-muted: #fedbda;
-  --accent: #734a33;
-  --success: #0b703f;
-  --on-success: #f8f8f8;
-  --success-muted: #cbefd6;
-  --warning: #b94f16;
-  --on-warning: #f8f8f8;
-  --warning-muted: #fff9d3;
-  --danger: #ac1922;
-  --on-danger: #f8f8f8;
-  --danger-muted: #ffd8d4;
-  --on-surface: #1b1414;
-  --on-accent: #f8f8f8;
-  --focus: #494040;
-  --selected: #e6dbdb;
-  --disabled: #706666;
-  --disabled-muted: #e9dede;
-  --info: #005fa8;
-  --on-info: #f8f8f8;
-  --info-muted: #cce8ff;
+  --background: #f5f4f0;
+  --surface: #ffffff;
+  --surface-raised: #eeefe8;
+  --ink: #202522;
+  --ink-muted: #626b65;
+  --line: #dcddd6;
+  --primary: #202522;
+  --on-primary: #ffffff;
+  --primary-muted: #e5e9e3;
+  --accent: #386957;
+  --on-accent: #ffffff;
+  --on-surface: #202522;
+  --focus: #386957;
+  --selected: #e5e9e3;
+  --disabled: #767c77;
+  --disabled-muted: #eeefe8;
+  --success: #386957;
+  --on-success: #ffffff;
+  --success-muted: #e5eee7;
+  --warning: #865f23;
+  --on-warning: #ffffff;
+  --warning-muted: #f5ebd9;
+  --danger: #ab3c32;
+  --on-danger: #ffffff;
+  --danger-muted: #fae7e3;
+  --info: #305d7c;
+  --on-info: #ffffff;
+  --info-muted: #e4edf4;
 }
-
 :root.dark {
   color-scheme: dark;
-  --background: #120b0b;
-  --surface: #191212;
-  --surface-raised: #221b1b;
-  --ink: #f0e5e4;
-  --ink-muted: #aca2a1;
-  --line: #393130;
-  --primary: #dfa7a6;
-  --on-primary: #161616;
-  --primary-muted: #402625;
-  --accent: #dbac92;
-  --success: #4add8c;
-  --on-success: #161616;
-  --success-muted: #173523;
-  --warning: #ec9453;
-  --on-warning: #161616;
-  --warning-muted: #362d0d;
-  --danger: #f8a49d;
-  --on-danger: #161616;
-  --danger-muted: #442321;
-  --on-surface: #f0e5e4;
-  --on-accent: #161616;
-  --focus: #ccc1c1;
-  --selected: #433b3a;
-  --disabled: #817877;
-  --disabled-muted: #413838;
-  --info: #80c3ff;
-  --on-info: #161616;
-  --info-muted: #192f46;
+  --background: #181c19;
+  --surface: #222723;
+  --surface-raised: #2d332d;
+  --ink: #eeefe8;
+  --ink-muted: #a8b0a8;
+  --line: #414840;
+  --primary: #eeefe8;
+  --on-primary: #202522;
+  --primary-muted: #35493e;
+  --accent: #a9c7b3;
+  --on-accent: #202522;
+  --on-surface: #eeefe8;
+  --focus: #a9c7b3;
+  --selected: #3c493f;
+  --disabled: #9aa397;
+  --disabled-muted: #30362f;
+  --success: #b5d5bb;
+  --on-success: #202522;
+  --success-muted: #2d4232;
+  --warning: #e1c493;
+  --on-warning: #202522;
+  --warning-muted: #463d2e;
+  --danger: #f0afa4;
+  --on-danger: #202522;
+  --danger-muted: #4b302c;
+  --info: #aacbe1;
+  --on-info: #202522;
+  --info-muted: #2c3d49;
 }

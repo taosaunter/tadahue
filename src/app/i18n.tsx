@@ -1,73 +1,74 @@
 // Locale provider only. Edit interface copy in ./locales/en.ts and ./locales/zh-TW.ts.
-import en from "./locales/en";
-import zhTW from "./locales/zh-TW";
+
 import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
-} from "react";
+} from 'react'
+import en from './locales/en'
+import zhTW from './locales/zh-TW'
 
-export type Locale = "en" | "zh-TW";
+export type Locale = 'en' | 'zh-TW'
 
 // Keep the key stable so upgrades retain the user's language preference.
-const STORAGE_KEY = "color-palette-locale";
-const messages = { en, "zh-TW": zhTW } as const;
+const STORAGE_KEY = 'color-palette-locale'
+const messages = { en, 'zh-TW': zhTW } as const
 
-export type MessageKey = keyof typeof messages.en;
+export type MessageKey = keyof typeof messages.en
 type Translator = (
   key: MessageKey,
   values?: Record<string, string | number>,
-) => string;
+) => string
 interface LocaleContextValue {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
-  t: Translator;
+  locale: Locale
+  setLocale: (locale: Locale) => void
+  t: Translator
 }
-const LocaleContext = createContext<LocaleContextValue | null>(null);
+const LocaleContext = createContext<LocaleContextValue | null>(null)
 
 function readLocale(): Locale {
   try {
-    return localStorage.getItem(STORAGE_KEY) === "zh-TW" ? "zh-TW" : "en";
+    return localStorage.getItem(STORAGE_KEY) === 'zh-TW' ? 'zh-TW' : 'en'
   } catch {
-    return "en";
+    return 'en'
   }
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(readLocale);
+  const [locale, setLocale] = useState<Locale>(readLocale)
   useEffect(() => {
-    document.documentElement.lang = locale;
+    document.documentElement.lang = locale
     try {
-      localStorage.setItem(STORAGE_KEY, locale);
+      localStorage.setItem(STORAGE_KEY, locale)
     } catch {
       /* session-only fallback */
     }
-  }, [locale]);
+  }, [locale])
   const value = useMemo<LocaleContextValue>(
     () => ({
       locale,
       setLocale,
       t: (key, values = {}) => {
-        let text: string = messages[locale][key];
+        let text: string = messages[locale][key]
         for (const [name, replacement] of Object.entries(values)) {
-          text = text.replaceAll(`{${name}}`, String(replacement));
+          text = text.replaceAll(`{${name}}`, String(replacement))
         }
-        return text;
+        return text
       },
     }),
     [locale],
-  );
+  )
   return (
     <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
-  );
+  )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// biome-ignore lint/style/useComponentExportOnlyModules: The locale hook shares its provider context.
 export function useLocale(): LocaleContextValue {
-  const value = useContext(LocaleContext);
-  if (!value) throw new Error("useLocale must be used inside LocaleProvider");
-  return value;
+  const value = useContext(LocaleContext)
+  if (!value) throw new Error('useLocale must be used inside LocaleProvider')
+  return value
 }

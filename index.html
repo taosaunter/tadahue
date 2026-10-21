@@ -23,7 +23,7 @@
           var dark = stored === "dark" || (stored !== "light" && prefersDark);
           document.documentElement.classList.add(dark ? "dark" : "light");
           document.documentElement.style.colorScheme = dark ? "dark" : "light";
-        } catch (e) {}
+        } catch { /* Use the default theme when browser preferences are unavailable. */ }
       })();
     </script>
   </head>

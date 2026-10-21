@@ -1,51 +1,40 @@
-import { useLocale } from "../../../app/i18n";
+import { ArrowUpRight } from 'lucide-react'
+import { useLocale } from '../../../app/i18n'
 
-// Static landing sample used to preview the current palette.
+// The sample demonstrates real palette roles; it is not a second application.
 export default function Landing() {
-  const { t } = useLocale();
+  const { t } = useLocale()
   return (
-    <div className="space-y-2 py-2">
-      <nav className="flex items-center justify-between">
-        <strong className="text-ink text-sm">Studio North</strong>
-        <span className="text-ink-muted text-xs">Work · About · Contact</span>
-      </nav>
-      <div className="bg-primary-muted rounded-xl px-5 py-8 sm:px-8">
-        <span className="text-accent text-xs font-semibold">
-          {t("landingTagline")}
-        </span>
-        <h3 className="text-ink mt-2 max-w-sm text-2xl leading-tight font-bold">
-          {t("landingHeading")}
-        </h3>
-        <p className="text-ink-muted mt-2 max-w-sm text-xs leading-relaxed">
-          {t("landingDescription")}
-        </p>
-        <div className="mt-4 flex gap-2">
-          <span className="bg-primary text-on-primary rounded-lg px-3 py-2 text-xs">
-            {t("continue")}
-          </span>
-          <span className="bg-accent text-on-accent rounded-lg px-3 py-2 text-xs">
-            {t("review")}
-          </span>
-        </div>
+    <div className="landing-sample">
+      <div className="landing-nav">
+        <span className="sample-brand-mark" aria-hidden="true" />
+        <strong>{t('sampleBrand')}</strong>
+        <span className="sample-about">{t('sampleAbout')}</span>
+        <span>{t('sampleWork')}</span>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="border-line bg-surface rounded-lg border p-3">
-          <strong className="text-on-surface text-xs">
-            {t("creativeDirection")}
-          </strong>
-          <p className="text-ink-muted mt-1 text-[11px]">
-            {t("creativeDescription")}
-          </p>
+      <div className="landing-content">
+        <div className="landing-copy">
+          <h3>{t('landingHeading')}</h3>
+          <p>{t('landingDescription')}</p>
+          <div className="sample-actions">
+            <span className="sample-primary">
+              <ArrowUpRight aria-hidden="true" />
+              {t('sampleStart')}
+            </span>
+            <span>{t('sampleMore')}</span>
+          </div>
         </div>
-        <div className="border-line bg-surface rounded-lg border p-3">
-          <strong className="text-on-surface text-xs">
-            {t("brandSystems")}
-          </strong>
-          <p className="text-ink-muted mt-1 text-[11px]">
-            {t("brandDescription")}
-          </p>
+        <div className="sample-project">
+          <h4>{t('sampleTitle')}</h4>
+          <span className="sample-input-label">{t('projectName')}</span>
+          <span className="sample-input">{t('sampleProject')}</span>
+          <div className="sample-tags">
+            <span>{t('sampleProgress')}</span>
+            <span>{t('samplePersonal')}</span>
+          </div>
+          <p>{t('sampleNote')}</p>
         </div>
       </div>
     </div>
-  );
+  )
 }

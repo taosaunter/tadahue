@@ -64,11 +64,14 @@ pnpm electron:dev    # 啟動桌面版
 pnpm build
 pnpm electron:build
 pnpm lint
+pnpm lint:fix
 pnpm test
 pnpm verify:theme
 ```
 
 建置 Windows 或 macOS 套件時，請使用對應平台的電腦或 CI runner。
+
+`pnpm lint` 使用 Biome 檢查格式、lint 規則與 import；`pnpm lint:fix` 套用安全修正。Tailwind class 排序使用 Biome 的實驗性 `useSortedClasses` 規則，目前尚未完整支援自訂 utility 與響應式 variant 排序。需要排序時，請明確執行 `pnpm exec biome lint --write --unsafe --only=useSortedClasses .`。遷移後的 Biome 規則並非每一條 ESLint 規則的完全等價替代。
 
 ## 授權
 

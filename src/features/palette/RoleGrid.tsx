@@ -1,13 +1,13 @@
-import type { ThemeRole } from "../../color/palette";
-import { useLocale } from "../../app/i18n";
+import { useLocale } from '../../app/i18n'
+import type { ThemeRole } from '../../color/palette'
 
 // Shared token swatches for the All color tokens and Tuning panels.
 interface RoleGridProps {
-  title: string;
-  roles: ThemeRole[];
-  copied: string | null;
-  error?: string | null;
-  onCopy: (hex: string, key: string) => void;
+  title: string
+  roles: ThemeRole[]
+  copied: string | null
+  error?: string | null
+  onCopy: (hex: string, key: string) => void
 }
 
 export default function RoleGrid({
@@ -17,14 +17,14 @@ export default function RoleGrid({
   error,
   onCopy,
 }: RoleGridProps) {
-  const { t } = useLocale();
+  const { t } = useLocale()
   return (
     <div className="rounded-lg p-2">
-      <h2 className="text-ink-muted mb-2 text-xs">{title}</h2>
+      <h2 className="mb-2 text-ink-muted text-xs">{title}</h2>
       <div className="swatch-grid">
         {roles.map((role) => {
-          const key = `${title}:${role.name}`;
-          const label = `${role.name} · ${role.hex} · ${error === key ? t("copyFailed") : copied === key ? t("copied") : t("copyHex", { hex: role.hex })}`;
+          const key = `${title}:${role.name}`
+          const label = `${role.name} · ${role.hex} · ${error === key ? t('copyFailed') : copied === key ? t('copied') : t('copyHex', { hex: role.hex })}`
           return (
             <button
               key={role.name}
@@ -35,12 +35,12 @@ export default function RoleGrid({
               className="swatch-button rounded-lg"
               style={{ backgroundColor: role.hex }}
             />
-          );
+          )
         })}
       </div>
       <p role="status" className="sr-only">
-        {error ? t("copyFailed") : copied ? t("copied") : ""}
+        {error ? t('copyFailed') : copied ? t('copied') : ''}
       </p>
     </div>
-  );
+  )
 }

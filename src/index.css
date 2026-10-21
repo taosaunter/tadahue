@@ -1,5 +1,10 @@
 /* Style entry point. Edit the feature stylesheet beside the relevant UI module. */
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/noto-sans-tc";
+@import "@fontsource-variable/manrope";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
 @import "./styles/theme.css";
 @import "./styles/base.css";
 @import "./shared/controls.css";

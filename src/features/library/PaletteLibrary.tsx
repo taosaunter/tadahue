@@ -1,13 +1,15 @@
 // Saved palettes tab: restore exact snapshots or delete local entries.
-import { useState } from "react";
-import { useLocale } from "../../app/i18n";
-import { harmonyColors, pairedColor } from "../../color/harmony";
-import type { SavedPaletteSnapshot } from "./savedPalettes";
+import { Bookmark, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { useLocale } from '../../app/i18n'
+import { harmonyColors, pairedColor } from '../../color/harmony'
+import type { SavedPaletteSnapshot } from './savedPalettes'
+
 interface Props {
-  saved: SavedPaletteSnapshot[];
-  activeId: string | null;
-  onLoad: (snapshot: SavedPaletteSnapshot) => void;
-  onDelete: (id: string) => boolean;
+  saved: SavedPaletteSnapshot[]
+  activeId: string | null
+  onLoad: (snapshot: SavedPaletteSnapshot) => void
+  onDelete: (id: string) => boolean
 }
 export default function PaletteLibrary({
   saved,
@@ -15,61 +17,70 @@ export default function PaletteLibrary({
   onLoad,
   onDelete,
 }: Props) {
-  const { t } = useLocale();
-  const [status, setStatus] = useState("");
+  const { t } = useLocale()
+  const [status, setStatus] = useState('')
   return (
-    <section aria-label={t("savedPalettes")}>
+    <section aria-label={t('savedPalettes')}>
       {status && (
-        <p role="status" className="text-ink-muted mb-2 text-xs">
+        <p role="status" className="mb-2 text-ink-muted text-xs">
           {status}
         </p>
       )}
       {saved.length ? (
-        <ul className="library-list space-y-2">
+        <ul className="library-list">
           {saved.map((item) => {
             const wheel = item.wheel ?? {
-              mode: "complementary",
-              accent: pairedColor(item.seed, "complementary"),
-            };
-            const colors = harmonyColors(item.seed, wheel.accent, wheel.mode);
+              mode: 'complementary',
+              accent: pairedColor(item.seed, 'complementary'),
+            }
+            const colors = harmonyColors(item.seed, wheel.accent, wheel.mode)
             return (
-              <li key={item.id} className="flex gap-1">
+              <li key={item.id} className="library-card">
                 <button
                   type="button"
-                  aria-label={t("loadPalette", { hex: item.seed })}
+                  aria-label={t('loadPalette', { hex: item.seed })}
                   aria-pressed={activeId === item.id}
                   title={item.name}
                   onClick={() => {
-                    onLoad(item);
-                    setStatus("");
+                    onLoad(item)
+                    setStatus('')
                   }}
-                  className={`saved-swatches min-w-0 flex-1 rounded-md border-2 ${activeId === item.id ? "border-primary" : "border-transparent"}`}
+                  className="saved-palette"
                 >
-                  {colors.map((hex, index) => (
-                    <span
-                      key={index}
-                      className="saved-swatch"
-                      style={{ background: hex }}
-                    />
-                  ))}
+                  <span className="saved-swatches">
+                    {colors.map((hex, index) => (
+                      <span
+                        key={index}
+                        className="saved-swatch"
+                        style={{ background: hex }}
+                      />
+                    ))}
+                  </span>
+                  <span className="saved-palette-info">
+                    <strong>{item.name || item.seed.toUpperCase()}</strong>
+                    <span>{t(wheel.mode)}</span>
+                  </span>
                 </button>
                 <button
                   type="button"
-                  className="text-ink-muted hover:bg-danger-muted hover:text-danger rounded-md px-2 text-sm"
-                  aria-label={t("deleteSavedPalette", { name: item.name })}
+                  className="delete-palette"
+                  aria-label={t('deleteSavedPalette', { name: item.name })}
                   onClick={() =>
-                    setStatus(onDelete(item.id) ? "" : t("storageError"))
+                    setStatus(onDelete(item.id) ? '' : t('storageError'))
                   }
                 >
-                  ×
+                  <Trash2 aria-hidden="true" />
                 </button>
               </li>
-            );
+            )
           })}
         </ul>
       ) : (
-        <p className="text-ink-muted text-[11px]">{t("libraryEmpty")}</p>
+        <div className="library-empty">
+          <Bookmark aria-hidden="true" />
+          <p>{t('libraryEmpty')}</p>
+        </div>
       )}
     </section>
-  );
+  )
 }

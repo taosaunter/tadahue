@@ -64,11 +64,14 @@ pnpm electron:dev    # Launch the desktop app
 pnpm build
 pnpm electron:build
 pnpm lint
+pnpm lint:fix
 pnpm test
 pnpm verify:theme
 ```
 
 Build Windows and macOS packages on a matching machine or CI runner.
+
+`pnpm lint` uses Biome to check formatting, lint rules, and imports; `pnpm lint:fix` applies safe fixes. Tailwind class sorting uses Biome's experimental `useSortedClasses` rule, which does not fully support custom utilities or responsive variant ordering. Apply its fixes explicitly with `pnpm exec biome lint --write --unsafe --only=useSortedClasses .`. Biome's migrated rules are not an exact replacement for every ESLint rule.
 
 ## License
 

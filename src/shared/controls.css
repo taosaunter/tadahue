@@ -85,7 +85,7 @@
   border-radius: 6px;
   background: var(--surface-raised);
   color: var(--ink);
-  font: 11px/1.5 sans-serif;
+  font: 11px / 1.5 sans-serif;
   white-space: normal;
   text-align: center;
   pointer-events: none;
@@ -143,5 +143,26 @@ input:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .icon-button {
     transition: none;
+  }
+}
+
+[data-slot="button"] {
+  cursor: pointer;
+}
+[data-slot="button"] svg {
+  stroke-width: 1.7;
+}
+[data-slot="button"]:disabled {
+  cursor: default;
+}
+[hidden] {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
   }
 }

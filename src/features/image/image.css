@@ -3,21 +3,32 @@
 .image-palette {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+.image-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: 12px;
 }
 
 .image-actions > button {
+  flex-shrink: 0;
   min-height: 32px;
+  white-space: nowrap;
 }
 
 .image-drop {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 260px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px;
   border: 1px dashed var(--line);
   border-radius: 8px;
   background: var(--surface-raised);
@@ -26,10 +37,15 @@
 .image-drop.image-dragging {
   border-color: var(--primary);
 }
+.image-drop > button {
+  flex-shrink: 0;
+}
 
 .image-preview-wrap {
   position: relative;
   width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .image-preview-wrap .image-remove {
@@ -42,21 +58,25 @@
 }
 
 .image-preview {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 220px;
+  height: 100%;
   object-fit: contain;
   border-radius: 4px;
 }
 
 .image-colors {
   display: flex;
+  flex: 1;
+  min-width: 0;
+  max-width: 184px;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
 .image-color {
-  flex: 0 0 32px;
-  width: 32px;
+  flex: 1;
+  min-width: 0;
   height: 32px;
   border-radius: 6px;
   position: relative;
@@ -70,45 +90,4 @@
 .image-color:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
-}
-
-@media (min-width: 901px) {
-  #panel-image .image-palette {
-    flex: 1;
-    min-width: 0;
-    min-height: 300px;
-    padding-bottom: 0;
-  }
-
-  #panel-image .image-drop {
-    flex: 1;
-    min-height: 0;
-  }
-
-  #panel-image .image-preview-wrap {
-    flex: 1;
-    min-height: 0;
-  }
-
-  #panel-image .image-preview {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-  }
-
-  #panel-image .image-colors {
-    flex-shrink: 0;
-  }
-
-  #panel-image .image-actions {
-    flex-shrink: 0;
-  }
-
-  #panel-image .image-drop > button {
-    flex-shrink: 0;
-  }
-
-  .image-actions {
-    margin-top: auto;
-  }
 }

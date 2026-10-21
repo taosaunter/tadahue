@@ -1,60 +1,60 @@
-import { useLocale } from "../../app/i18n";
-import { EyedropperIcon } from "../../shared/Icons";
-import type { useScreenPicker } from "./useScreenPicker";
+import { Pipette } from 'lucide-react'
+import { useLocale } from '../../app/i18n'
+import { Button } from '../../shared/ui/button'
+import type { useScreenPicker } from './useScreenPicker'
 
-type Props = { picker: ReturnType<typeof useScreenPicker> };
+type Props = { picker: ReturnType<typeof useScreenPicker> }
 
 const PICKER_ERROR_MESSAGES = {
-  "screenshot-unavailable": "pickerScreenshotUnavailable",
-  "screen-permission": "pickerPermission",
-  "capture-failed": "pickerFailed",
-  "native-unavailable": "pickerNativeUnavailable",
-  "native-failed": "pickerNativeFailed",
-} as const;
+  'screenshot-unavailable': 'pickerScreenshotUnavailable',
+  'screen-permission': 'pickerPermission',
+  'capture-failed': 'pickerFailed',
+  'native-unavailable': 'pickerNativeUnavailable',
+  'native-failed': 'pickerNativeFailed',
+} as const
 
 // Toolbar action is separate from the status below the workspace.
 export function ScreenPickerButton({ picker }: Props) {
-  const { t } = useLocale();
-  if (!window.colorPicker) return null;
+  const { t } = useLocale()
   return (
-    <button
+    <Button
       type="button"
       onClick={() => picker.start()}
-      className="icon-button"
-      aria-label={t("eyedropper")}
-      disabled={picker.picking}
-      data-tooltip={t("eyedropper")}
-      title={t("eyedropper")}
+      className="screen-picker-button"
+      variant="outline"
+      aria-label={t('eyedropper')}
+      disabled={picker.picking || !window.colorPicker}
+      data-tooltip={t('eyedropper')}
+      title={t(window.colorPicker ? 'screenPick' : 'desktopPickerOnly')}
     >
-      <EyedropperIcon />
-    </button>
-  );
+      <Pipette aria-hidden="true" />
+      {t('screenPick')}
+    </Button>
+  )
 }
 
 export function ScreenPickerStatus({ picker }: Props) {
-  const { t } = useLocale();
+  const { t } = useLocale()
   return (
-    <>
-      {picker.picking && (
-        <p className="text-accent mt-2 text-xs">{t("picking")}</p>
-      )}
+    <div className="save-feedback">
+      {picker.picking && <p className="text-accent text-xs">{t('picking')}</p>}
       {picker.error && (
-        <div className="mt-2">
+        <div>
           <p role="alert" className="text-accent text-xs">
             {t(PICKER_ERROR_MESSAGES[picker.error])}
           </p>
           {picker.nativeAvailable &&
-            picker.error === "screenshot-unavailable" && (
+            picker.error === 'screenshot-unavailable' && (
               <button
                 className="quiet-button mt-2"
                 type="button"
-                onClick={() => picker.start("native")}
+                onClick={() => picker.start('native')}
               >
-                {t("pickerUseNative")}
+                {t('pickerUseNative')}
               </button>
             )}
         </div>
       )}
-    </>
-  );
+    </div>
+  )
 }

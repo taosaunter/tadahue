@@ -91,3 +91,51 @@
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
+
+.app-settings-panel {
+  position: fixed;
+  inset: 64px 20px auto auto;
+  margin: 0;
+  width: min(300px, calc(100vw - 40px));
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 32px #0002;
+}
+.app-settings-panel h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block: 12px;
+  font-size: 12px;
+}
+.preference-row > div {
+  display: flex;
+  gap: 4px;
+}
+.preference-row [data-slot="button"] {
+  height: 32px;
+  padding-inline: 10px;
+  font-size: 12px;
+}
+.app-settings-panel .desktop-settings {
+  position: relative;
+}
+.app-settings-panel .display-settings-panel {
+  position: static;
+  width: 100%;
+  margin-top: 12px;
+  box-shadow: none;
+}
+.app-settings-panel {
+  max-height: calc(100dvh - 84px);
+  overflow: auto;
+}

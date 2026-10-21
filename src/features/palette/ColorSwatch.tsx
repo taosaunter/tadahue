@@ -1,17 +1,18 @@
 // Reusable HEX swatch with clipboard feedback and an accessible label.
-import { useCopy } from "../../shared/useCopy";
-import { useLocale } from "../../app/i18n";
+
+import { useLocale } from '../../app/i18n'
+import { useCopy } from '../../shared/useCopy'
 
 interface ColorSwatchProps {
-  hex: string;
-  label?: string;
+  hex: string
+  label?: string
 }
 
 export default function ColorSwatch({ hex, label }: ColorSwatchProps) {
-  const { copied, copy } = useCopy(1000);
-  const { t } = useLocale();
+  const { copied, copy } = useCopy(1000)
+  const { t } = useLocale()
 
-  const description = `${label ? label + " · " : ""}${hex} · ${copied === hex ? t("copied") : t("copyHex", { hex })}`;
+  const description = `${label ? label + ' · ' : ''}${hex} · ${copied === hex ? t('copied') : t('copyHex', { hex })}`
   return (
     <button
       type="button"
@@ -21,5 +22,5 @@ export default function ColorSwatch({ hex, label }: ColorSwatchProps) {
       className="swatch-button rounded-md"
       style={{ backgroundColor: hex }}
     />
-  );
+  )
 }
