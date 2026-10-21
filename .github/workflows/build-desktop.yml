@@ -1,0 +1,66 @@
+name: Build desktop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Checks (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - run: npm install --global pnpm@12.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+  package:
+    name: Package (${{ matrix.name }})
+    needs: checks
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            runner: windows-2025
+            args: --win --x64
+            artifact: release/*.exe
+          - name: macos-x64
+            runner: macos-15-intel
+            args: --mac --x64 --config.mac.identity=-
+            artifact: release/*.dmg
+          - name: macos-arm64
+            runner: macos-15
+            args: --mac --arm64 --config.mac.identity=-
+            artifact: release/*.dmg
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - run: npm install --global pnpm@12.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Package desktop app
+        run: pnpm exec electron-builder ${{ matrix.args }} --publish never
+      - name: Upload installers
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: TadaHue-${{ matrix.name }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
+          retention-days: 7

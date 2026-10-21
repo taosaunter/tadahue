@@ -69,8 +69,6 @@ pnpm test
 pnpm verify:theme
 ```
 
-建置 Windows 或 macOS 套件時，請使用對應平台的電腦或 CI runner。
-
 ## 授權
 
 TadaHue 採用 MIT License。套件與字型授權請參閱[第三方授權說明](../THIRD_PARTY_NOTICES.md)，其中包含 Linux Wayland 支援使用的 `@homebridge/dbus-native`。

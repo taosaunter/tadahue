@@ -4,27 +4,27 @@
 
 Start with this table before searching the whole repository. Each feature keeps its layout markup and stylesheet together. Visible text lives in the locale files rather than in layout modules.
 
-| UI area | Markup / interaction | Styles |
-| --- | --- | --- |
-| App composition | `src/app/App.tsx` | `src/features/workspace/workspace.css` |
-| Three-column workspace, shared heights, dialogs, tuning tabs and reset | `src/features/workspace/PaletteWorkspace.tsx` | `src/features/workspace/workspace.css` |
-| Color sources, base/background input and fixed-background mode | `src/features/workspace/PaletteControls.tsx` | `src/features/workspace/workspace.css` |
-| Independent tool/result tab labels, order, arrow-key navigation | `src/features/workspace/tabs.ts`, `WorkspaceTabs.tsx` | `src/features/workspace/workspace.css` |
-| HEX inputs and RGB popovers | `src/features/palette/ColorInput.tsx` | `src/features/palette/palette.css` |
-| Linked wheel handles and five palette colors | `src/features/palette/ColorWheel.tsx`, `HarmonyPalette.tsx` | `src/features/palette/palette.css` |
-| Preview samples, style dropdown and theme toggle | `src/features/preview/ThemePreview.tsx`, `samples/Dashboard.tsx`, `samples/Landing.tsx`, `samples/Form.tsx` | `src/features/preview/preview.css` |
-| Contrast checks / 對比檢查 | `src/features/preview/ContrastPanel.tsx` | `src/features/preview/preview.css` |
-| Tuning / 微調 | `src/features/tuning/TuningPanel.tsx` | `src/features/tuning/tuning.css` |
-| All color tokens / 完整色票 | `src/features/palette/RoleGrid.tsx` | `src/features/palette/palette.css` |
-| More palettes / 更多配色 | `src/features/palette/MorePalettes.tsx`, `PaletteSection.tsx`, `ColorSwatch.tsx` | `src/features/palette/palette.css` |
-| Image colors / 圖片取色 | `src/features/image/ImagePalette.tsx` | `src/features/image/image.css` |
-| Saved palettes / 已存色板 | `src/features/library/PaletteLibrary.tsx` | `src/features/library/library.css` |
-| Language, appearance, desktop preferences | `src/features/settings/AppSettings.tsx`, `DesktopSettings.tsx` | `src/features/settings/settings.css` |
-| Screen eyedropper button and feedback | `src/features/picker/ScreenPickerControls.tsx` | Shared button styles |
-| Shared buttons, selects, tooltips | `src/shared/ui/`, feature markup and Lucide icons | `src/shared/controls.css` |
-| Semantic theme tokens and fallback colors | `src/color/palette.ts`, `src/app/usePaletteWorkspace.ts` | `src/styles/theme.css` |
-| Desktop startup dimensions and work-area constraints | `electron/workspace-window.mjs`, `electron/main.mjs` | — |
-| Interface text | `src/app/locales/en.ts`, `src/app/locales/zh-TW.ts` | — |
+| UI area                                                                | Markup / interaction                                                                                        | Styles                                 |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| App composition                                                        | `src/app/App.tsx`                                                                                           | `src/features/workspace/workspace.css` |
+| Three-column workspace, shared heights, dialogs, tuning tabs and reset | `src/features/workspace/PaletteWorkspace.tsx`                                                               | `src/features/workspace/workspace.css` |
+| Color sources, base/background input and fixed-background mode         | `src/features/workspace/PaletteControls.tsx`                                                                | `src/features/workspace/workspace.css` |
+| Independent tool/result tab labels, order, arrow-key navigation        | `src/features/workspace/tabs.ts`, `WorkspaceTabs.tsx`                                                       | `src/features/workspace/workspace.css` |
+| HEX inputs and RGB popovers                                            | `src/features/palette/ColorInput.tsx`                                                                       | `src/features/palette/palette.css`     |
+| Linked wheel handles and five palette colors                           | `src/features/palette/ColorWheel.tsx`, `HarmonyPalette.tsx`                                                 | `src/features/palette/palette.css`     |
+| Preview samples, style dropdown and theme toggle                       | `src/features/preview/ThemePreview.tsx`, `samples/Dashboard.tsx`, `samples/Landing.tsx`, `samples/Form.tsx` | `src/features/preview/preview.css`     |
+| Contrast checks / 對比檢查                                             | `src/features/preview/ContrastPanel.tsx`                                                                    | `src/features/preview/preview.css`     |
+| Tuning / 微調                                                          | `src/features/tuning/TuningPanel.tsx`                                                                       | `src/features/tuning/tuning.css`       |
+| All color tokens / 完整色票                                            | `src/features/palette/RoleGrid.tsx`                                                                         | `src/features/palette/palette.css`     |
+| More palettes / 更多配色                                               | `src/features/palette/MorePalettes.tsx`, `PaletteSection.tsx`, `ColorSwatch.tsx`                            | `src/features/palette/palette.css`     |
+| Image colors / 圖片取色                                                | `src/features/image/ImagePalette.tsx`                                                                       | `src/features/image/image.css`         |
+| Saved palettes / 已存色板                                              | `src/features/library/PaletteLibrary.tsx`                                                                   | `src/features/library/library.css`     |
+| Language, appearance, desktop preferences                              | `src/features/settings/AppSettings.tsx`, `DesktopSettings.tsx`                                              | `src/features/settings/settings.css`   |
+| Screen eyedropper button and feedback                                  | `src/features/picker/ScreenPickerControls.tsx`                                                              | Shared button styles                   |
+| Shared buttons, selects, tooltips                                      | `src/shared/ui/`, feature markup and Lucide icons                                                           | `src/shared/controls.css`              |
+| Semantic theme tokens and fallback colors                              | `src/color/palette.ts`, `src/app/usePaletteWorkspace.ts`                                                    | `src/styles/theme.css`                 |
+| Desktop startup dimensions and work-area constraints                   | `electron/workspace-window.mjs`, `electron/main.mjs`                                                        | —                                      |
+| Interface text                                                         | `src/app/locales/en.ts`, `src/app/locales/zh-TW.ts`                                                         | —                                      |
 
 `src/index.css` only imports these stylesheets. Do not append feature-specific rules there.
 

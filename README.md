@@ -69,8 +69,6 @@ pnpm test
 pnpm verify:theme
 ```
 
-Build Windows and macOS packages on a matching machine or CI runner.
-
 ## License
 
 TadaHue is licensed under the MIT License. See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency and font licenses, including `@homebridge/dbus-native` for Linux Wayland support.
