@@ -283,14 +283,14 @@ async function main() {
       ),
     )
     await setSeed(seed)
-    await click('.preview-appearance button[aria-label="Dark"]')
+    await click('.preview-appearance button')
     check(
       'Preview theme is independent of app appearance',
       await page.evaluate(
         "document.querySelector('.preview-canvas').dataset.theme==='dark' && document.documentElement.classList.contains('light')",
       ),
     )
-    await click('.preview-appearance button[aria-label="Light"]')
+    await click('.preview-appearance button')
     await click('.header-export')
     check(
       'Export opens an accessible dialog',
@@ -354,7 +354,6 @@ async function main() {
       ),
     )
     await click('.contrast-sheet .sheet-heading button')
-    await click('.advanced-controls summary')
     await click('#tab-tokens')
     check(
       'Advanced tokens remain available',
@@ -368,7 +367,6 @@ async function main() {
       (await page.evaluate('navigator.clipboard.readText()')) ===
         baseline.light[0].hex,
     )
-    await click('.advanced-controls summary')
     await page.evaluate("document.querySelector('.wheel-handle').focus()")
     await page.send('Input.dispatchKeyEvent', {
       type: 'keyDown',

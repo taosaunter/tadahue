@@ -10,3 +10,6 @@ notes/
 .codex/
 AGENTS.md
 CLAUDE.md
+.env
+.env.*
+.aws/

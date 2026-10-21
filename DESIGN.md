@@ -96,7 +96,9 @@ The wordmark uses Manrope; interface copy uses Noto Sans TC; hex values and code
 
 ## Layout
 
-The desktop header is 80px high. The workspace uses a 288px editor column, 32px gap, and 32px page padding. At 900px and below, the header is 72px, the editor and preview become tabbed views, and page padding is 20px. The mobile bottom action bar preserves access to save and export. These values come from `src/features/workspace/workspace.css`.
+The desktop header is 80px high. The workspace has a 272px color editor, a flexible preview, and a 272px tuning column, with 24px gaps and page padding. At desktop heights of 800px or less, gaps and padding reduce to 20px. At 1100px and below, the header is 72px and editor, preview, and library use tabs; the editor keeps color and tuning controls side by side until 680px, then stacks them. The mobile bottom action bar preserves access to save and export. See `src/features/workspace/workspace.css`.
+
+Color-code and image sources share a fixed-height area so switching sources does not move the wheel or preview. Advanced tuning stays visible. The style dropdown and single light/dark preview toggle sit together in the preview toolbar; fixed-background mode belongs beside the base-color input.
 
 ## Elevation & Depth
 
@@ -125,7 +127,7 @@ Common control radii are 7–8px. Swatches and preview surfaces use 10–12px co
 - Selecting a swatch copies its value and gives visible feedback.
 
 ### Preview Action
-- The sample interface's primary action is 146px wide with 14px text.
+- The sample interface's primary action sizes to its content, with a 36px height and 12px text. The website sample uses two flexible columns so its project panel remains visible at the default desktop size and on narrow previews.
 
 ## Do's and Don'ts
 

@@ -10,7 +10,7 @@ A desktop color toolkit for creating palettes, exploring color harmonies, and pr
 
 ## Features
 
-- Explore complementary, split-complementary, and triadic harmonies on an interactive five-handle color wheel; copy the five labeled HEX colors.
+- Explore complementary harmonies with two linked wheel handles, or split-complementary and triadic harmonies with three; copy the five palette HEX colors.
 - Generate complete 11-step 50–950 color scales and complementary, analogous, monochromatic, split-complementary, triadic, and shade palettes.
 - Tune hue, lightness, and chroma in OKLCH; choose balanced, pastel, or vintage styles.
 - Preview light and dark themes in dashboard, landing-page, and form layouts.
@@ -50,7 +50,7 @@ TadaHue has no analytics, telemetry, crash reporting, accounts, or cloud sync. I
 
 ## Development
 
-Requires Node.js and pnpm. See the [developer guide](notes/DEVELOPMENT.md) for component locations, palette state, and layout behavior.
+Requires Node.js and pnpm. See the [developer guide](docs/DEVELOPMENT.md) for component locations, palette state, and layout behavior, and [design system](DESIGN.md) for interface conventions.
 
 ```bash
 pnpm install
@@ -71,8 +71,6 @@ pnpm verify:theme
 
 Build Windows and macOS packages on a matching machine or CI runner.
 
-`pnpm lint` uses Biome to check formatting, lint rules, and imports; `pnpm lint:fix` applies safe fixes. Tailwind class sorting uses Biome's experimental `useSortedClasses` rule, which does not fully support custom utilities or responsive variant ordering. Apply its fixes explicitly with `pnpm exec biome lint --write --unsafe --only=useSortedClasses .`. Biome's migrated rules are not an exact replacement for every ESLint rule.
-
 ## License
 
-TadaHue is licensed under the MIT License. Linux Wayland support uses `@homebridge/dbus-native`; see [third-party notices](./docs/THIRD_PARTY_NOTICES.md) for its dependency licenses.
+TadaHue is licensed under the MIT License. See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency and font licenses, including `@homebridge/dbus-native` for Linux Wayland support.

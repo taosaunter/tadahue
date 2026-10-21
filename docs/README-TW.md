@@ -10,7 +10,7 @@
 
 ## 功能
 
-- 使用可互動的五控制點色輪探索互補色、分裂互補色及三角色配色，並複製附有標籤的五組 HEX 色碼。
+- 使用兩個連動控制點探索互補色，或以三個控制點探索分裂互補色與三角色配色，並複製色盤中的五組 HEX 色碼。
 - 產生完整的 11 階 50–950 色階，以及互補色、類似色、單色、分裂互補色、三角色與陰影色。
 - 以 OKLCH 微調色相、明度和彩度，並選擇平衡、粉彩或復古風格。
 - 在儀表板、形象頁和表單版面預覽亮色與暗色主題。
@@ -50,7 +50,7 @@ TadaHue 不含分析、遙測或崩潰回報功能，也沒有帳號或雲端同
 
 ## 開發
 
-需要 Node.js 與 pnpm。元件位置、配色狀態及版面規則請參閱[開發指南](../notes/DEVELOPMENT.md)。
+需要 Node.js 與 pnpm。元件位置、配色狀態及版面規則請參閱[開發指南](DEVELOPMENT.md)，介面慣例請參閱[設計系統](../DESIGN.md)。
 
 ```bash
 pnpm install
@@ -71,8 +71,6 @@ pnpm verify:theme
 
 建置 Windows 或 macOS 套件時，請使用對應平台的電腦或 CI runner。
 
-`pnpm lint` 使用 Biome 檢查格式、lint 規則與 import；`pnpm lint:fix` 套用安全修正。Tailwind class 排序使用 Biome 的實驗性 `useSortedClasses` 規則，目前尚未完整支援自訂 utility 與響應式 variant 排序。需要排序時，請明確執行 `pnpm exec biome lint --write --unsafe --only=useSortedClasses .`。遷移後的 Biome 規則並非每一條 ESLint 規則的完全等價替代。
-
 ## 授權
 
-TadaHue 採用 MIT License。Linux Wayland 支援使用 `@homebridge/dbus-native`；其依賴套件授權列於[第三方授權 notices](THIRD_PARTY_NOTICES.md)。
+TadaHue 採用 MIT License。套件與字型授權請參閱[第三方授權說明](../THIRD_PARTY_NOTICES.md)，其中包含 Linux Wayland 支援使用的 `@homebridge/dbus-native`。
