@@ -22,7 +22,7 @@ export default function PaletteLibrary({
   return (
     <section aria-label={t('savedPalettes')}>
       {status && (
-        <p role="status" className="mb-2 text-ink-muted text-xs">
+        <p role="status" className="text-ink-muted mb-2 text-xs">
           {status}
         </p>
       )}

@@ -4,11 +4,11 @@
 
 ## 套件格式
 
-| 平台 | 套件 |
-| --- | --- |
-| Linux | AppImage |
+| 平台    | 套件                          |
+| ------- | ----------------------------- |
+| Linux   | AppImage                      |
 | Windows | NSIS 安裝程式或 portable 版本 |
-| macOS | DMG |
+| macOS   | DMG                           |
 
 ## 螢幕吸管
 
@@ -29,4 +29,3 @@ macOS 請在「**系統設定 → 隱私權與安全性 → 螢幕錄製**」允
 ## Linux X11 相容模式
 
 開啟「**桌面設定 → X11 相容模式**」，再選擇「**重新啟動並套用**」。系統需提供 XWayland。此選項會切換 Electron 的顯示後端；若 TadaHue 仍在 Wayland 工作階段中執行，螢幕取色會繼續使用截圖 Portal。手動指定 `--ozone-platform` 啟動參數時，會優先採用該參數。
-

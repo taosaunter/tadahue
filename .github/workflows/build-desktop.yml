@@ -39,11 +39,11 @@ jobs:
             artifact: release/*.exe
           - name: macos-x64
             runner: macos-15-intel
-            args: --mac --x64 --config.mac.identity=-
+            args: --mac --x64 --config.mac.sign.identity=-
             artifact: release/*.dmg
           - name: macos-arm64
             runner: macos-15
-            args: --mac --arm64 --config.mac.identity=-
+            args: --mac --arm64 --config.mac.sign.identity=-
             artifact: release/*.dmg
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -4,11 +4,11 @@
 
 ## Package formats
 
-| Platform | Package |
-| --- | --- |
-| Linux | AppImage |
-| Windows | NSIS installer or portable package |
-| macOS | DMG |
+| Platform | Package                            |
+| -------- | ---------------------------------- |
+| Linux    | AppImage                           |
+| Windows  | NSIS installer or portable package |
+| macOS    | DMG                                |
 
 ## Screen eyedropper
 
@@ -29,4 +29,3 @@ On macOS, allow TadaHue under **System Settings → Privacy & Security → Scree
 ## Linux X11 compatibility mode
 
 Open **Desktop settings → X11 compatibility mode**, then choose **Restart and apply**. XWayland must be available. This changes Electron's display backend; when TadaHue is running in a Wayland session, screen picking continues to use the screenshot portal. An explicit `--ozone-platform` command-line option takes precedence over the saved setting.
-

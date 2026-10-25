@@ -22,10 +22,10 @@ export default function TuningPanel({
         const color = hsv(parseHex(hex))
         return (
           color && (
-            <label key={index} className="block text-ink-muted text-xs">
+            <label key={index} className="text-ink-muted block text-xs">
               {t(index === 0 ? 'colorOne' : 'colorTwo')} · {t('brightness')}
               <input
-                className="mt-1 block w-full accent-primary"
+                className="accent-primary mt-1 block w-full"
                 type="range"
                 min="0.01"
                 max="1"
@@ -52,10 +52,10 @@ export default function TuningPanel({
           ['chromaScale', 'tuneChroma', 0.5, 1.5, 0.05, '×'],
         ] as const
       ).map(([field, label, min, max, step, unit]) => (
-        <label key={field} className="block text-ink-muted text-xs">
+        <label key={field} className="text-ink-muted block text-xs">
           <span className="flex justify-between">
             <span>{t(label)}</span>
-            <output className="font-mono text-ink">
+            <output className="text-ink font-mono">
               {field === 'lightnessShift'
                 ? tuning[field].toFixed(2)
                 : tuning[field]}
@@ -63,7 +63,7 @@ export default function TuningPanel({
             </output>
           </span>
           <input
-            className="mt-1 w-full accent-primary"
+            className="accent-primary mt-1 w-full"
             aria-label={t(label)}
             type="range"
             min={min}
@@ -79,7 +79,7 @@ export default function TuningPanel({
           />
         </label>
       ))}
-      <p className="text-[11px] text-ink-muted leading-relaxed">
+      <p className="text-ink-muted text-[11px] leading-relaxed">
         {t('tuningHint')}
       </p>
     </div>

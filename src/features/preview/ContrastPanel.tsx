@@ -17,13 +17,13 @@ export default function ContrastPanel({
   )
   return (
     <div className="contrast-panel">
-      <h2 className="font-medium text-sm">
+      <h2 className="text-sm font-medium">
         {t('contrastSummary', {
           passed: String(checks.filter((check) => check.ok).length),
           total: String(checks.length),
         })}
       </h2>
-      <p className="mt-2 text-ink-muted text-xs leading-relaxed">
+      <p className="text-ink-muted mt-2 text-xs leading-relaxed">
         {t('contrastHint')}
       </p>
       <table className="contrast-table">

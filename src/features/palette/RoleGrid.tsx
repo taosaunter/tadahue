@@ -20,7 +20,7 @@ export default function RoleGrid({
   const { t } = useLocale()
   return (
     <div className="rounded-lg p-2">
-      <h2 className="mb-2 text-ink-muted text-xs">{title}</h2>
+      <h2 className="text-ink-muted mb-2 text-xs">{title}</h2>
       <div className="swatch-grid">
         {roles.map((role) => {
           const key = `${title}:${role.name}`

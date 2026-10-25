@@ -14,7 +14,7 @@ export default function PaletteSection({
 }: PaletteSectionProps) {
   return (
     <section className="palette-family">
-      <h2 className="font-medium text-ink-muted text-xs">{title}</h2>
+      <h2 className="text-ink-muted text-xs font-medium">{title}</h2>
       <div className="swatch-grid">
         {colors.map((hex, i) =>
           labels?.[i] ? (

@@ -46,12 +46,12 @@ test('every mode and style has the same semantic schema and valid contrast refer
         palette.dark.map(({ name }) => name),
       )
       for (const theme of ['light', 'dark'] as const) {
-        const roles = Object.fromEntries(
+        const roles: Record<string, string> = Object.fromEntries(
           palette[theme].map(({ name, hex }) => [name, hex]),
         )
         for (const name of requiredRoles)
           assert.match(roles[name], /^#[0-9a-f]{6}$/i, `${theme} ${name}`)
-        const pairKeys = new Set(
+        const pairKeys: Set<string> = new Set(
           palette.checks[theme].map(({ fg, bg }) => `${fg}/${bg}`),
         )
         for (const pair of [
