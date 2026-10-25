@@ -39,8 +39,6 @@ export default {
   exportJsonHint:
     'Includes both themes, color scales and your palette settings.',
   exportCopy: 'Copy {format}',
-  clipboardLocal: 'Copied to your clipboard. Nothing is uploaded.',
-  copiedOutput: '{format} copied to clipboard',
   close: 'Close',
   preferences: 'Preferences',
   appearance: 'App appearance',

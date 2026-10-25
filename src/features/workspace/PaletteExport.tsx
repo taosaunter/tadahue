@@ -132,22 +132,8 @@ export default function PaletteExport({
           </div>
         )}
         <div className="export-footer">
-          <p
-            role="status"
-            className={error ? 'feedback-error' : 'copy-feedback'}
-          >
-            {error
-              ? t('copyFailed')
-              : copied
-                ? t('copiedOutput', {
-                    format:
-                      format === 'json'
-                        ? 'JSON'
-                        : format === 'css'
-                          ? 'CSS'
-                          : 'Tailwind',
-                  })
-                : ''}
+          <p role="status" className={error ? 'feedback-error' : 'sr-only'}>
+            {error ? t('copyFailed') : copied === format ? t('copied') : ''}
           </p>
           <Button
             disabled={!palette}
@@ -167,7 +153,6 @@ export default function PaletteExport({
                     : 'Tailwind',
             })}
           </Button>
-          <p>{t('clipboardLocal')}</p>
         </div>
       </SheetContent>
     </Sheet>

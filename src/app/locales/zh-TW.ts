@@ -35,8 +35,6 @@ export default {
   exportJsonHeading: '設計色彩變數 JSON',
   exportJsonHint: '包含兩套主題、完整色階與目前的配色設定。',
   exportCopy: '複製 {format}',
-  clipboardLocal: '內容只會複製到剪貼簿，不會上傳。',
-  copiedOutput: '{format} 已複製到剪貼簿',
   close: '關閉',
   preferences: '偏好設定',
   appearance: '介面外觀',

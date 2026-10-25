@@ -151,9 +151,10 @@ test('fixed backgrounds survive styles and extreme tuning with readable web role
               `${background} ${style}: ${check.label} ${check.ratio}`,
             )
         }
-        assert.match(
-          palette.css,
-          new RegExp(`--background: ${background.toUpperCase()};`),
+        assert.ok(
+          palette.css.includes(
+            `--background: light-dark(${background.toUpperCase()}, ${background.toUpperCase()});`,
+          ),
         )
         assert.equal(
           designTokens(palette, style, tuning).background,

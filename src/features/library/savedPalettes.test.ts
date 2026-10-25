@@ -72,9 +72,10 @@ test('saved snapshot round trips exact token values and all export formats', asy
   )
   assert.deepEqual(tokens.tuning, tuning)
   assert.equal(tokens.semanticTokens.dark.primary.$value, snapshot.dark.primary)
-  assert.match(
-    restored.css,
-    new RegExp(`--primary: ${snapshot.light.primary};`),
+  assert.ok(
+    restored.css.includes(
+      `--primary: light-dark(${snapshot.light.primary}, ${snapshot.dark.primary});`,
+    ),
   )
   const config = (
     await import(
@@ -160,7 +161,10 @@ test('exported CSS, token JSON, Tailwind config, and library JSON remain usable 
       writeFile(configPath, tailwindConfig(palette)),
       writeFile(libraryPath, serializeLibrary([snapshot])),
     ])
-    assert.match(await readFile(cssPath, 'utf8'), /:root\.dark \{/)
+    assert.match(
+      await readFile(cssPath, 'utf8'),
+      /\.dark \{\s+color-scheme: dark;\s+\}/,
+    )
     assert.equal(
       JSON.parse(await readFile(tokensPath, 'utf8')).semanticTokens.light
         .primary.$value,

@@ -550,8 +550,6 @@ export function assembleThemePalette(
   const pairVars = names
     .map((n) => `  --${n}: light-dark(${lightVars[n]}, ${darkVars[n]});`)
     .join('\n')
-  const decls = (vars: Record<string, string>) =>
-    names.map((n) => `  --${n}: ${vars[n]};`).join('\n')
 
   return {
     seed: seedHex.toUpperCase(),
@@ -560,7 +558,7 @@ export function assembleThemePalette(
     light,
     dark,
     checks: { light: runChecks(light), dark: runChecks(dark) },
-    css: `@theme inline {\n${atTheme}\n}\n\n:root {\n  color-scheme: light dark; \n${pairVars}\n}\n\n\n:root.light {\n  color-scheme: light;\n${decls(lightVars)}\n}\n\n:root.dark {\n  color-scheme: dark;\n${decls(darkVars)}\n}`,
+    css: `@theme inline {\n${atTheme}\n}\n\n:root {\n  color-scheme: light dark;\n${pairVars}\n}\n\n.light {\n  color-scheme: light;\n}\n\n.dark {\n  color-scheme: dark;\n}`,
   }
 }
 

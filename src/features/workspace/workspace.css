@@ -448,9 +448,6 @@
   line-height: 20px;
   color: var(--ink-muted);
 }
-.export-footer > p:empty {
-  display: none;
-}
 .contrast-sheet {
   width: min(600px, 100vw);
 }

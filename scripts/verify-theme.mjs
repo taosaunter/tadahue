@@ -303,17 +303,28 @@ async function main() {
       const content = await page.evaluate(
         "document.querySelector('.export-code code').textContent",
       )
+      const buttonBounds = await page.evaluate(
+        "JSON.stringify(document.querySelector('.export-footer button').getBoundingClientRect())",
+      )
       await click('.export-footer button')
       const copied = await page.evaluate('navigator.clipboard.readText()')
       check(
         `${format}: copies the complete displayed export`,
         copied === content && content.length > 1000,
       )
+      check(
+        `${format}: copy feedback keeps the button in place`,
+        buttonBounds ===
+          (await page.evaluate(
+            "JSON.stringify(document.querySelector('.export-footer button').getBoundingClientRect())",
+          )),
+      )
       if (format === 'css')
         check(
           'CSS contains both themes and Tailwind v4 tokens',
-          content.includes(':root.light') &&
-            content.includes(':root.dark') &&
+          content.includes('light-dark(') &&
+            content.includes('.light {\n  color-scheme: light;\n}') &&
+            content.includes('.dark {\n  color-scheme: dark;\n}') &&
             content.includes('@theme'),
         )
       if (format === 'json') check('Token JSON parses', !!JSON.parse(content))
